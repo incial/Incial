@@ -5,6 +5,7 @@ import com.incial.workhub.exception.OurException;
 import com.incial.workhub.model.CRM;
 import com.incial.workhub.repository.CRMRepository;
 import com.incial.workhub.service.repo.ICRMService;
+import com.incial.workhub.utils.Utils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -28,7 +29,7 @@ public class CRMService implements ICRMService {
             crmRepository.save(crm);
             response.setStatusCode(201);
             response.setMessage("CRM entry created successfully");
-            response.setCrm(crm);
+            response.setCrmdto(Utils.mapCRMToDTO(crm));
         } catch (Exception e) {
             response.setStatusCode(500);
             response.setMessage("Error while creating CRM: " + e.getMessage());
@@ -44,7 +45,7 @@ public class CRMService implements ICRMService {
         Response response = new Response();
         try {
             List<CRM> list = crmRepository.findAll();
-            response.setCrmList(list);
+            response.setCrmList(Utils.mapListToCRMDTO(list));
             response.setStatusCode(200);
             response.setMessage("CRM entries fetched successfully");
         } catch (Exception e) {
@@ -64,7 +65,7 @@ public class CRMService implements ICRMService {
             CRM crm = crmRepository.findById(id)
                     .orElseThrow(() -> new OurException("CRM entry not found"));
 
-            response.setCrm(crm);
+            response.setCrmdto(Utils.mapCRMToDTO(crm));
             response.setStatusCode(200);
             response.setMessage("CRM fetched successfully");
 
@@ -108,7 +109,7 @@ public class CRMService implements ICRMService {
 
             response.setStatusCode(200);
             response.setMessage("CRM updated successfully");
-            response.setCrm(crm);
+            response.setCrmdto(Utils.mapCRMToDTO(crm));
 
         } catch (OurException e) {
             response.setStatusCode(404);
@@ -154,7 +155,7 @@ public class CRMService implements ICRMService {
         Response response = new Response();
         try {
             List<CRM> list = crmRepository.findByStatus(status);
-            response.setCrmList(list);
+            response.setCrmList(Utils.mapListToCRMDTO(list));
             response.setStatusCode(200);
             response.setMessage("Filtered by status");
         } catch (Exception e) {
@@ -169,7 +170,7 @@ public class CRMService implements ICRMService {
         Response response = new Response();
         try {
             List<CRM> list = crmRepository.findByAssignedTo(assignedTo);
-            response.setCrmList(list);
+            response.setCrmList(Utils.mapListToCRMDTO(list));
             response.setStatusCode(200);
             response.setMessage("Filtered by assigned user");
         } catch (Exception e) {
@@ -184,7 +185,7 @@ public class CRMService implements ICRMService {
         Response response = new Response();
         try {
             List<CRM> list = crmRepository.findByTagsContaining(tag);
-            response.setCrmList(list);
+            response.setCrmList(Utils.mapListToCRMDTO(list));
             response.setStatusCode(200);
             response.setMessage("Filtered by tag");
         } catch (Exception e) {
@@ -199,7 +200,7 @@ public class CRMService implements ICRMService {
         Response response = new Response();
         try {
             List<CRM> list = crmRepository.findByLeadSourcesContaining(source);
-            response.setCrmList(list);
+            response.setCrmList(Utils.mapListToCRMDTO(list));
             response.setStatusCode(200);
             response.setMessage("Filtered by lead source");
         } catch (Exception e) {
@@ -217,7 +218,7 @@ public class CRMService implements ICRMService {
         Response response = new Response();
         try {
             List<CRM> list = crmRepository.findByDealValueGreaterThanEqual(minValue);
-            response.setCrmList(list);
+            response.setCrmList(Utils.mapListToCRMDTO(list));
             response.setStatusCode(200);
             response.setMessage("High value deals fetched");
         } catch (Exception e) {
@@ -236,7 +237,7 @@ public class CRMService implements ICRMService {
         try {
             LocalDate today = LocalDate.now();
             List<CRM> list = crmRepository.findByNextFollowUpAfterOrderByNextFollowUpAsc(today);
-            response.setCrmList(list);
+            response.setCrmList(Utils.mapListToCRMDTO(list));
             response.setStatusCode(200);
             response.setMessage("Upcoming follow-ups fetched");
         } catch (Exception e) {
@@ -251,7 +252,7 @@ public class CRMService implements ICRMService {
         Response response = new Response();
         try {
             List<CRM> list = crmRepository.findByNextFollowUp(date);
-            response.setCrmList(list);
+            response.setCrmList(Utils.mapListToCRMDTO(list));
             response.setStatusCode(200);
             response.setMessage("Follow-ups for date fetched");
         } catch (Exception e) {

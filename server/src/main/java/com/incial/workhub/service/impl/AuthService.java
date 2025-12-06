@@ -3,12 +3,14 @@ package com.incial.workhub.service.impl;
 import com.incial.workhub.dto.LoginRequest;
 import com.incial.workhub.dto.RegisterRequest;
 import com.incial.workhub.dto.Response;
+import com.incial.workhub.dto.UserDTO;
 import com.incial.workhub.enums.USER_ROLE;
 import com.incial.workhub.exception.OurException;
 import com.incial.workhub.model.User;
 import com.incial.workhub.repository.UserRepository;
 import com.incial.workhub.security.JwtTokenProvider;
 import com.incial.workhub.service.repo.IAuthService;
+import com.incial.workhub.utils.Utils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -64,11 +66,15 @@ public class AuthService implements IAuthService {
 
             User saved = userRepository.save(user);
 
+            // Auto-login token
             String token = jwtTokenProvider.generateToken(saved);
+
+            // Map user to DTO
+            UserDTO userDTO = Utils.mapUserToDTO(saved);
 
             response.setStatusCode(200);
             response.setMessage("User registered successfully");
-            response.setUser(saved);
+            response.setUserDTO(userDTO);
             response.setToken(token);
             response.setRole(saved.getRole().name());
 
@@ -104,10 +110,13 @@ public class AuthService implements IAuthService {
             // Generate JWT
             String token = jwtTokenProvider.generateToken(user);
 
+            // Convert user to DTO
+            UserDTO userDTO = Utils.mapUserToDTO(user);
+
             response.setStatusCode(200);
             response.setToken(token);
             response.setRole(user.getRole().name());
-            response.setUser(user);
+            response.setUserDTO(userDTO);
             response.setMessage("Login successful");
 
         } catch (BadCredentialsException e) {
