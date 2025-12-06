@@ -1,7 +1,9 @@
+
 import React from 'react';
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { CRMPage } from './pages/CRMPage';
+import { CompaniesPage } from './pages/CompaniesPage';
 import { LoginPage } from './pages/LoginPage';
 
 // Protected Route Wrapper
@@ -33,6 +35,11 @@ const AppRoutes = () => {
             <Route path="/crm" element={
                 <ProtectedRoute>
                     <CRMPage />
+                </ProtectedRoute>
+            } />
+            <Route path="/companies" element={
+                <ProtectedRoute>
+                    <CompaniesPage />
                 </ProtectedRoute>
             } />
             {/* Redirect root to CRM for this demo */}
