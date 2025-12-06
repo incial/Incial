@@ -3,7 +3,7 @@ import { CRMEntry } from '../types';
 import { MOCK_CRM_DATA } from './mockData';
 
 // In a real app, this comes from env
-const API_URL = 'http://localhost:8080/api'; 
+const API_URL = import.meta.env.VITE_BACKEND_API_URL || 'http://localhost:8080/api'; 
 
 const api = axios.create({
   baseURL: API_URL,
