@@ -64,7 +64,7 @@ export interface CompanyFilterState {
 
 // --- TASKS MODULE TYPES ---
 
-export type TaskStatus = 'Not Started' | 'In Progress' | 'Completed' | 'Dropped' | 'Done'; // Added Dropped/Done for Client Tracker
+export type TaskStatus = 'Not Started' | 'In Progress' | 'In Review' | 'Posted' | 'Completed' | 'Dropped' | 'Done'; // Added Dropped/Done for Client Tracker
 export type TaskPriority = 'Low' | 'Medium' | 'High';
 export type TaskType = 'General' | 'Reel' | 'Post' | 'Story' | 'Carousel' | 'Video'; // Added for Client Tracker
 

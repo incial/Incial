@@ -40,7 +40,7 @@ const KanbanColumn = ({
 
     return (
         <div 
-            className="flex-1 min-w-[300px] bg-gray-50/50 rounded-2xl p-4 border border-gray-100 flex flex-col h-full"
+            className="flex-1 min-w-[280px] bg-gray-50/50 rounded-2xl p-4 border border-gray-100 flex flex-col h-full"
             onDragOver={handleDragOver}
             onDrop={handleDrop}
         >
@@ -55,7 +55,7 @@ const KanbanColumn = ({
                 </button>
             </div>
 
-            <div className="space-y-3 flex-1 overflow-y-auto pr-1 pb-10">
+            <div className="space-y-3 flex-1 overflow-y-auto pr-1 pb-10 custom-scrollbar">
                 {tasks.map(task => (
                     <div 
                         key={task.id}
@@ -107,7 +107,7 @@ export const TasksKanban: React.FC<TasksKanbanProps> = ({ tasks, onEdit, onStatu
     };
 
     return (
-        <div className="flex gap-6 h-full overflow-x-auto pb-4 items-stretch">
+        <div className="flex gap-4 h-full overflow-x-auto pb-4 items-stretch px-2">
             <KanbanColumn 
                 title="To Do" 
                 status="Not Started" 
@@ -125,10 +125,26 @@ export const TasksKanban: React.FC<TasksKanbanProps> = ({ tasks, onEdit, onStatu
                 onDrop={handleDrop}
             />
             <KanbanColumn 
+                title="In Review" 
+                status="In Review" 
+                color="bg-purple-500" 
+                tasks={tasks.filter(t => t.status === 'In Review')} 
+                onEdit={onEdit}
+                onDrop={handleDrop}
+            />
+            <KanbanColumn 
+                title="Posted" 
+                status="Posted" 
+                color="bg-sky-500" 
+                tasks={tasks.filter(t => t.status === 'Posted')} 
+                onEdit={onEdit}
+                onDrop={handleDrop}
+            />
+            <KanbanColumn 
                 title="Completed" 
                 status="Completed" 
                 color="bg-green-500" 
-                tasks={tasks.filter(t => t.status === 'Completed')} 
+                tasks={tasks.filter(t => t.status === 'Completed' || t.status === 'Done')} 
                 onEdit={onEdit}
                 onDrop={handleDrop}
             />

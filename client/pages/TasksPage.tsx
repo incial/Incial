@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Navbar } from '../components/layout/Navbar';
 import { Sidebar } from '../components/layout/Sidebar';
-import { tasksApi } from '../services/api';
+import { tasksApi, crmApi } from '../services/api';
 import { Task, TaskFilterState, TaskPriority, TaskStatus } from '../types';
 import { TasksTable } from '../components/tasks/TasksTable';
 import { TasksKanban } from '../components/tasks/TasksKanban';
@@ -18,6 +18,7 @@ type ViewMode = 'list' | 'kanban' | 'calendar' | 'mine';
 export const TasksPage: React.FC = () => {
   const { user } = useAuth();
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [companyMap, setCompanyMap] = useState<Record<number, string>>({});
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | undefined>(undefined);
@@ -36,10 +37,22 @@ export const TasksPage: React.FC = () => {
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      const data = await tasksApi.getAll();
-      setTasks(data);
+      const [tasksData, crmData] = await Promise.all([
+          tasksApi.getAll(),
+          crmApi.getAll()
+      ]);
+      
+      setTasks(tasksData);
+      
+      // Build Company Map
+      const map: Record<number, string> = {};
+      crmData.crmList.forEach(c => {
+          map[c.id] = c.company;
+      });
+      setCompanyMap(map);
+
       // Mock Persistence
-      localStorage.setItem('mock_tasks_data', JSON.stringify(data));
+      localStorage.setItem('mock_tasks_data', JSON.stringify(tasksData));
     } catch (err) {
       console.error(err);
     } finally {
@@ -221,6 +234,7 @@ export const TasksPage: React.FC = () => {
                         {(viewMode === 'list' || viewMode === 'mine') && (
                             <TasksTable 
                                 data={filteredTasks} 
+                                companyMap={companyMap}
                                 onEdit={handleEdit} 
                                 onDelete={handleRequestDelete}
                                 onStatusChange={handleStatusChange}
@@ -257,6 +271,7 @@ export const TasksPage: React.FC = () => {
         onClose={() => setIsModalOpen(false)}
         onSubmit={handleSave}
         initialData={editingTask}
+        companyMap={companyMap}
       />
 
       <DeleteConfirmationModal 

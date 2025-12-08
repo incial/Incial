@@ -2,10 +2,11 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Task, TaskPriority, TaskStatus } from '../../types';
 import { formatDate, getTaskPriorityStyles, getTaskStatusStyles } from '../../utils';
-import { Edit2, Trash2, ChevronDown, Calendar, Check } from 'lucide-react';
+import { Edit2, Trash2, ChevronDown, Calendar, Check, Building } from 'lucide-react';
 
 interface TasksTableProps {
   data: Task[];
+  companyMap?: Record<number, string>;
   onEdit: (task: Task) => void;
   onDelete: (id: number) => void;
   onStatusChange: (task: Task, newStatus: TaskStatus) => void;
@@ -26,7 +27,7 @@ const Avatar = ({ name }: { name: string }) => {
 const StatusDropdown = ({ task, onStatusChange }: { task: Task; onStatusChange: (t: Task, s: TaskStatus) => void }) => {
     const [isOpen, setIsOpen] = useState(false);
     const ref = useRef<HTMLDivElement>(null);
-    const options: TaskStatus[] = ['Not Started', 'In Progress', 'Completed'];
+    const options: TaskStatus[] = ['Not Started', 'In Progress', 'In Review', 'Posted', 'Completed'];
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -59,6 +60,8 @@ const StatusDropdown = ({ task, onStatusChange }: { task: Task; onStatusChange: 
                             >
                                 <span className={`w-2 h-2 rounded-full mr-2 ${
                                     opt === 'Completed' ? 'bg-green-500' : 
+                                    opt === 'Posted' ? 'bg-sky-500' :
+                                    opt === 'In Review' ? 'bg-purple-500' :
                                     opt === 'In Progress' ? 'bg-blue-500' : 'bg-gray-400'
                                 }`} />
                                 {opt}
@@ -119,13 +122,14 @@ const PriorityDropdown = ({ task, onPriorityChange }: { task: Task; onPriorityCh
 };
 
 
-export const TasksTable: React.FC<TasksTableProps> = ({ data, onEdit, onDelete, onStatusChange, onPriorityChange }) => {
+export const TasksTable: React.FC<TasksTableProps> = ({ data, companyMap, onEdit, onDelete, onStatusChange, onPriorityChange }) => {
   return (
-    <div className="overflow-x-auto bg-white min-h-[400px] pb-32"> {/* Added pb-32 for dropdown space */}
+    <div className="overflow-x-auto bg-white min-h-[400px] pb-32">
         <table className="w-full text-left border-collapse whitespace-nowrap">
             <thead>
                 <tr className="bg-gray-50/50 border-b border-gray-100">
-                    <th className="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-wider w-1/3">Task Name</th>
+                    <th className="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-wider w-1/4">Task Name</th>
+                    <th className="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-wider">Client</th>
                     <th className="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-wider">Status</th>
                     <th className="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-wider">Assignee</th>
                     <th className="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-wider">Due Date</th>
@@ -134,7 +138,10 @@ export const TasksTable: React.FC<TasksTableProps> = ({ data, onEdit, onDelete, 
                 </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
-                {data.map(task => (
+                {data.map(task => {
+                    const clientName = (task.companyId && companyMap) ? companyMap[task.companyId] : null;
+                    
+                    return (
                     <tr key={task.id} className="group hover:bg-gray-50/50 transition-colors">
                         {/* Name */}
                         <td className="px-6 py-3">
@@ -143,6 +150,18 @@ export const TasksTable: React.FC<TasksTableProps> = ({ data, onEdit, onDelete, 
                             </button>
                             {task.description && (
                                 <p className="text-[11px] text-gray-400 truncate max-w-xs mt-0.5">{task.description}</p>
+                            )}
+                        </td>
+
+                        {/* Client */}
+                        <td className="px-6 py-3">
+                            {clientName ? (
+                                <div className="flex items-center gap-1.5 text-xs font-semibold text-gray-700">
+                                    <Building className="h-3 w-3 text-gray-400" />
+                                    {clientName}
+                                </div>
+                            ) : (
+                                <span className="text-xs text-gray-400 italic">Internal</span>
                             )}
                         </td>
 
@@ -184,10 +203,10 @@ export const TasksTable: React.FC<TasksTableProps> = ({ data, onEdit, onDelete, 
                              </div>
                         </td>
                     </tr>
-                ))}
+                )})}
                 {data.length === 0 && (
                      <tr>
-                        <td colSpan={6} className="px-6 py-12 text-center text-gray-400 text-sm">
+                        <td colSpan={7} className="px-6 py-12 text-center text-gray-400 text-sm">
                             <div className="flex flex-col items-center justify-center gap-2">
                                 <div className="h-12 w-12 bg-gray-50 rounded-full flex items-center justify-center">
                                     <Check className="h-6 w-6 text-gray-300" />

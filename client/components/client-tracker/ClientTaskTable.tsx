@@ -15,7 +15,7 @@ interface ClientTaskTableProps {
 const StatusDropdown = ({ task, onStatusChange }: { task: Task; onStatusChange: (t: Task, s: TaskStatus) => void }) => {
     const [isOpen, setIsOpen] = useState(false);
     const ref = useRef<HTMLDivElement>(null);
-    const options: TaskStatus[] = ['Not Started', 'In Progress', 'Done', 'Dropped'];
+    const options: TaskStatus[] = ['Not Started', 'In Progress', 'In Review', 'Posted', 'Done', 'Dropped'];
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -29,6 +29,8 @@ const StatusDropdown = ({ task, onStatusChange }: { task: Task; onStatusChange: 
         switch(status) {
             case 'Done': 
             case 'Completed': return 'bg-green-100 text-green-700 border-green-200';
+            case 'Posted': return 'bg-sky-100 text-sky-700 border-sky-200';
+            case 'In Review': return 'bg-purple-100 text-purple-700 border-purple-200';
             case 'Dropped': 
             case 'drop': return 'bg-red-100 text-red-700 border-red-200';
             case 'In Progress': return 'bg-blue-100 text-blue-700 border-blue-200';
@@ -48,7 +50,7 @@ const StatusDropdown = ({ task, onStatusChange }: { task: Task; onStatusChange: 
             </button>
             
             {isOpen && (
-                <div className="absolute top-full left-0 z-50 mt-1 w-32 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden animate-in fade-in zoom-in-95 duration-100">
+                <div className="absolute top-full left-0 z-50 mt-1 w-36 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden animate-in fade-in zoom-in-95 duration-100">
                     <div className="p-1">
                         {options.map(opt => (
                             <button

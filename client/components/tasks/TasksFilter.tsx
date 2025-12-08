@@ -24,6 +24,8 @@ export const TasksFilter: React.FC<TasksFilterProps> = ({ filters, setFilters })
     { label: "All Status", value: "" },
     { label: "Not Started", value: "Not Started" },
     { label: "In Progress", value: "In Progress" },
+    { label: "In Review", value: "In Review" },
+    { label: "Posted", value: "Posted" },
     { label: "Completed", value: "Completed" },
   ];
 
