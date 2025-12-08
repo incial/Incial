@@ -53,7 +53,7 @@ export const Sidebar: React.FC = () => {
                 <p className="px-7 text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">Analytics</p>
                 <div className="space-y-1">
                     <NavItem icon={PieChart} label="Reports" to="/reports" active={currentPath === '/reports'} />
-                    <NavItem icon={Layers} label="Pipelines" to="/pipelines" active={currentPath === '/pipelines'} />
+                    {/* Removed Pipelines Link */}
                 </div>
             </div>
         )}

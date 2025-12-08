@@ -26,6 +26,7 @@ export const ClientTaskForm: React.FC<ClientTaskFormProps> = ({ isOpen, onClose,
         setFormData({
           companyId,
           title: '',
+          description: '',
           status: 'Not Started',
           priority: 'Medium',
           taskType: 'General',
@@ -84,6 +85,19 @@ export const ClientTaskForm: React.FC<ClientTaskFormProps> = ({ isOpen, onClose,
                     onChange={e => setFormData({...formData, taskLink: e.target.value})}
                 />
              </div>
+
+             {/* Description Input */}
+             <div>
+                <label className="flex items-center gap-2 text-sm text-gray-500 mb-2">
+                    <AlignLeft className="h-4 w-4" /> Description
+                </label>
+                <textarea 
+                    className="w-full bg-white border border-gray-200 rounded-xl p-3 text-sm text-gray-900 focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 resize-none h-24 placeholder-gray-400"
+                    placeholder="Add more details about this task..."
+                    value={formData.description || ''}
+                    onChange={e => setFormData({...formData, description: e.target.value})}
+                />
+            </div>
 
             <div className="grid grid-cols-2 gap-6 pt-4 border-t border-gray-50">
                  

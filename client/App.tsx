@@ -19,7 +19,7 @@ const ProtectedRoute: React.FC<{ children: React.ReactElement }> = ({ children }
   return children;
 };
 
- //localStorage.clear();
+localStorage.clear();
 
 // Admin Only Route Wrapper
 const AdminRoute: React.FC<{ children: React.ReactElement }> = ({ children }) => {
