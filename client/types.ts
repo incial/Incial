@@ -64,17 +64,22 @@ export interface CompanyFilterState {
 
 // --- TASKS MODULE TYPES ---
 
-export type TaskStatus = 'Not Started' | 'In Progress' | 'Completed';
+export type TaskStatus = 'Not Started' | 'In Progress' | 'Completed' | 'Dropped' | 'Done'; // Added Dropped/Done for Client Tracker
 export type TaskPriority = 'Low' | 'Medium' | 'High';
+export type TaskType = 'General' | 'Reel' | 'Post' | 'Story' | 'Carousel' | 'Video'; // Added for Client Tracker
 
 export interface Task {
   id: number;
+  companyId?: number; // Link to specific client
   title: string;
   description?: string;
   status: TaskStatus;
   priority: TaskPriority;
+  taskType?: TaskType; // Type of content/task
   assignedTo: string; // User name or 'Unassigned'
   dueDate: string; // YYYY-MM-DD
+  attachments?: string[]; // Links or filenames
+  taskLink?: string; // Specific link field
   createdAt: string;
   lastUpdatedBy?: string;
   lastUpdatedAt?: string;

@@ -7,6 +7,8 @@ import { CompaniesPage } from './pages/CompaniesPage';
 import { TasksPage } from './pages/TasksPage';
 import { LoginPage } from './pages/LoginPage';
 import { AnalyticsPage } from './pages/AnalyticsPage';
+import { ClientTrackerPage } from './pages/ClientTrackerPage';
+import { ClientDetailsPage } from './pages/ClientDetailsPage';
 
 // Protected Route Wrapper
 const ProtectedRoute: React.FC<{ children: React.ReactElement }> = ({ children }) => {
@@ -16,6 +18,8 @@ const ProtectedRoute: React.FC<{ children: React.ReactElement }> = ({ children }
   }
   return children;
 };
+
+ //localStorage.clear();
 
 // Admin Only Route Wrapper
 const AdminRoute: React.FC<{ children: React.ReactElement }> = ({ children }) => {
@@ -72,6 +76,18 @@ const AppRoutes = () => {
             <Route path="/tasks" element={
                 <ProtectedRoute>
                     <TasksPage />
+                </ProtectedRoute>
+            } />
+
+            {/* Client Tracker Routes */}
+            <Route path="/client-tracker" element={
+                <ProtectedRoute>
+                    <ClientTrackerPage />
+                </ProtectedRoute>
+            } />
+            <Route path="/client-tracker/:id" element={
+                <ProtectedRoute>
+                    <ClientDetailsPage />
                 </ProtectedRoute>
             } />
             
