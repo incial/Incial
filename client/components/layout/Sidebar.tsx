@@ -1,8 +1,6 @@
 
-
-
 import React from 'react';
-import { Users, Briefcase, Settings, PieChart, Layers, ChevronRight, CheckSquare, ListTodo, BarChart2, Calendar } from 'lucide-react';
+import { Users, Briefcase, Settings, PieChart, Layers, ChevronRight, CheckSquare, ListTodo, BarChart2, Calendar, CalendarDays } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 
@@ -43,6 +41,7 @@ export const Sidebar: React.FC = () => {
             <p className="px-7 text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">Overview</p>
             <div className="space-y-1">
                 {isAdmin && <NavItem icon={Users} label="CRM & Leads" to="/crm" active={currentPath === '/crm'} />}
+                <NavItem icon={CalendarDays} label="Universal Calendar" to="/calendar" active={currentPath === '/calendar'} />
                 <NavItem icon={CheckSquare} label="Tasks" to="/tasks" active={currentPath.startsWith('/tasks')} />
                 <NavItem icon={Calendar} label="Meeting Tracker" to="/meetings" active={currentPath.startsWith('/meetings')} />
                 <NavItem icon={Briefcase} label="Companies" to="/companies" active={currentPath.startsWith('/companies')} />

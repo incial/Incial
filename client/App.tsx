@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -10,6 +11,8 @@ import { ClientTrackerPage } from './pages/ClientTrackerPage';
 import { ClientDetailsPage } from './pages/ClientDetailsPage';
 import { AdminPerformancePage } from './pages/AdminPerformancePage';
 import { MeetingTrackerPage } from './pages/MeetingTrackerPage';
+import { UniversalCalendarPage } from './pages/UniversalCalendarPage';
+
 // Protected Route Wrapper
 const ProtectedRoute: React.FC<{ children: React.ReactElement }> = ({ children }) => {
   const { isAuthenticated } = useAuth();
@@ -79,6 +82,11 @@ const AppRoutes = () => {
             <Route path="/meetings" element={
                 <ProtectedRoute>
                     <MeetingTrackerPage />
+                </ProtectedRoute>
+            } />
+            <Route path="/calendar" element={
+                <ProtectedRoute>
+                    <UniversalCalendarPage />
                 </ProtectedRoute>
             } />
 

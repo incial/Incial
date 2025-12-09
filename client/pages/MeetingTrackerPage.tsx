@@ -6,8 +6,9 @@ import { meetingsApi } from '../services/api';
 import { Meeting, MeetingStatus } from '../types';
 import { MeetingTable } from '../components/meetings/MeetingTable';
 import { MeetingForm } from '../components/meetings/MeetingForm';
+import { MeetingsCalendar } from '../components/meetings/MeetingsCalendar';
 import { DeleteConfirmationModal } from '../components/ui/DeleteConfirmationModal';
-import { Calendar, Plus, Search, Filter, LayoutList, Clock, CheckCircle } from 'lucide-react';
+import { Calendar, Plus, Search, Filter, LayoutList, Clock, CheckCircle, Calendar as CalendarIcon } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 export const MeetingTrackerPage: React.FC = () => {
@@ -16,6 +17,7 @@ export const MeetingTrackerPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   
   // UI State
+  const [viewMode, setViewMode] = useState<'list' | 'calendar'>('list');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingMeeting, setEditingMeeting] = useState<Meeting | undefined>(undefined);
   const [deleteId, setDeleteId] = useState<number | null>(null);
@@ -114,34 +116,62 @@ export const MeetingTrackerPage: React.FC = () => {
 
            <div className="bg-white rounded-3xl shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] border border-gray-100/50 flex flex-col flex-1 overflow-hidden">
                 
-                {/* Filters Toolbar */}
+                {/* View Toggle & Filters Toolbar */}
                 <div className="p-4 border-b border-gray-100 flex flex-col md:flex-row gap-4 items-center justify-between bg-white z-20">
-                    <div className="flex items-center gap-2 overflow-x-auto w-full md:w-auto pb-2 md:pb-0">
-                         {['All', 'Scheduled', 'Completed', 'Cancelled', 'Postponed'].map((status) => (
-                             <button
-                                key={status}
-                                onClick={() => setActiveFilter(status as any)}
-                                className={`px-4 py-2 rounded-xl text-sm font-bold transition-all whitespace-nowrap ${
-                                    activeFilter === status 
-                                    ? 'bg-brand-600 text-white shadow-md shadow-brand-500/20' 
-                                    : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+                    <div className="flex items-center gap-4 w-full md:w-auto">
+                        {/* View Switcher */}
+                        <div className="flex p-1 bg-gray-100 rounded-xl">
+                            <button
+                                onClick={() => setViewMode('list')}
+                                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                                    viewMode === 'list' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'
                                 }`}
-                             >
-                                 {status === 'All' ? 'All Meetings' : status}
-                             </button>
-                         ))}
+                            >
+                                <LayoutList className="h-3.5 w-3.5" /> List
+                            </button>
+                            <button
+                                onClick={() => setViewMode('calendar')}
+                                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                                    viewMode === 'calendar' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'
+                                }`}
+                            >
+                                <CalendarIcon className="h-3.5 w-3.5" /> Calendar
+                            </button>
+                        </div>
+
+                        {/* Status Filter (List View Only) */}
+                        {viewMode === 'list' && (
+                            <div className="flex items-center gap-2 overflow-x-auto pb-2 md:pb-0 hide-scrollbar">
+                                {['All', 'Scheduled', 'Completed', 'Cancelled', 'Postponed'].map((status) => (
+                                    <button
+                                        key={status}
+                                        onClick={() => setActiveFilter(status as any)}
+                                        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap border ${
+                                            activeFilter === status 
+                                            ? 'bg-brand-50 text-brand-700 border-brand-200' 
+                                            : 'bg-white text-gray-500 border-gray-200 hover:bg-gray-50'
+                                        }`}
+                                    >
+                                        {status === 'All' ? 'All' : status}
+                                    </button>
+                                ))}
+                            </div>
+                        )}
                     </div>
 
-                    <div className="w-full md:w-64 relative">
-                        <Search className="absolute left-3.5 top-2.5 h-4 w-4 text-gray-400" />
-                        <input 
-                            type="text" 
-                            placeholder="Search by title..." 
-                            className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all"
-                            value={search}
-                            onChange={e => setSearch(e.target.value)}
-                        />
-                    </div>
+                    {/* Search (List View Only) */}
+                    {viewMode === 'list' && (
+                        <div className="w-full md:w-64 relative">
+                            <Search className="absolute left-3.5 top-2.5 h-4 w-4 text-gray-400" />
+                            <input 
+                                type="text" 
+                                placeholder="Search by title..." 
+                                className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all"
+                                value={search}
+                                onChange={e => setSearch(e.target.value)}
+                            />
+                        </div>
+                    )}
                 </div>
 
                 <div className="flex-1 overflow-y-auto bg-white p-0">
@@ -150,18 +180,31 @@ export const MeetingTrackerPage: React.FC = () => {
                             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-600" />
                         </div>
                     ) : (
-                        <MeetingTable 
-                            data={filteredMeetings} 
-                            onEdit={handleEdit} 
-                            onDelete={(id) => setDeleteId(id)} 
-                        />
+                        <>
+                            {viewMode === 'list' ? (
+                                <MeetingTable 
+                                    data={filteredMeetings} 
+                                    onEdit={handleEdit} 
+                                    onDelete={(id) => setDeleteId(id)} 
+                                />
+                            ) : (
+                                <div className="h-full p-6">
+                                    <MeetingsCalendar 
+                                        meetings={filteredMeetings} 
+                                        onEdit={handleEdit} 
+                                    />
+                                </div>
+                            )}
+                        </>
                     )}
                 </div>
 
-                <div className="p-3 border-t border-gray-50 bg-white text-xs font-medium text-gray-400 flex justify-between">
-                    <span>{filteredMeetings.length} records found</span>
-                    <span>Sorted by Date (Newest)</span>
-                </div>
+                {viewMode === 'list' && (
+                    <div className="p-3 border-t border-gray-50 bg-white text-xs font-medium text-gray-400 flex justify-between">
+                        <span>{filteredMeetings.length} records found</span>
+                        <span>Sorted by Date (Newest)</span>
+                    </div>
+                )}
            </div>
         </main>
       </div>
