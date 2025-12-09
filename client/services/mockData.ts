@@ -303,5 +303,44 @@ export const MOCK_TASKS_DATA: Task[] = [
     createdAt: "2023-10-25T14:00:00Z",
     lastUpdatedBy: "Demo User",
     lastUpdatedAt: "2023-10-25T14:10:00Z"
+  },
+  {
+    id: 6,
+    // Internal Task
+    title: "Weekly Team Sync",
+    description: "Discuss project updates and blockers for the week with the design and dev team.",
+    status: "Not Started",
+    priority: "Medium",
+    taskType: "General",
+    assignedTo: "Vallapata",
+    dueDate: new Date().toISOString().split('T')[0],
+    createdAt: "2023-11-01T09:00:00Z",
+    isVisibleOnMainBoard: true
+  },
+  {
+    id: 7,
+    // Internal Task
+    title: "Update Software Licenses",
+    description: "Renew Adobe Creative Cloud subscriptions for the design team.",
+    status: "In Progress",
+    priority: "High",
+    taskType: "General",
+    assignedTo: "Admin User",
+    dueDate: "2023-11-10",
+    createdAt: "2023-11-01T10:00:00Z",
+    isVisibleOnMainBoard: true
+  },
+  {
+    id: 8,
+    companyId: 1, // SMR Rubbers
+    title: "Urgent: Server Downtime Investigation",
+    description: "Website is loading very slowly. Needs immediate attention from the dev team.",
+    status: "In Progress",
+    priority: "High",
+    taskType: "General",
+    assignedTo: "John Doe",
+    dueDate: new Date().toISOString().split('T')[0],
+    createdAt: "2023-11-02T08:00:00Z",
+    isVisibleOnMainBoard: true // Pinned to Main Board example
   }
 ];

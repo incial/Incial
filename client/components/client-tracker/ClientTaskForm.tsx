@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { X, Save, Calendar, User, AlignLeft, Tag, Layers, Flag, Link as LinkIcon, Edit2, ExternalLink, Clock, CheckCircle, History, Maximize2, Minimize2 } from 'lucide-react';
+import { X, Save, Calendar, User, AlignLeft, Tag, Layers, Flag, Link as LinkIcon, Edit2, ExternalLink, Clock, CheckCircle, History, Maximize2, Minimize2, Layout } from 'lucide-react';
 import { Task, TaskPriority, TaskStatus, TaskType } from '../../types';
 import { formatDate } from '../../utils';
 
@@ -36,7 +36,8 @@ export const ClientTaskForm: React.FC<ClientTaskFormProps> = ({ isOpen, onClose,
           taskType: 'General',
           assignedTo: 'Vallapata',
           dueDate: new Date().toISOString().split('T')[0],
-          taskLink: ''
+          taskLink: '',
+          isVisibleOnMainBoard: false // Default to false
         });
         setMode('edit');
       }
@@ -81,7 +82,14 @@ export const ClientTaskForm: React.FC<ClientTaskFormProps> = ({ isOpen, onClose,
                       {formData.status}
                   </span>
               </div>
-              <h2 className="text-2xl font-bold text-gray-900 leading-tight">{formData.title}</h2>
+              <h2 className="text-2xl font-bold text-gray-900 leading-tight flex items-start justify-between">
+                  {formData.title}
+                  {formData.isVisibleOnMainBoard && (
+                      <span className="ml-2 inline-flex items-center gap-1 px-2 py-1 rounded-md bg-indigo-50 text-indigo-700 text-[10px] font-bold uppercase tracking-wide border border-indigo-100 whitespace-nowrap">
+                          <Layout className="h-3 w-3" /> On Main Board
+                      </span>
+                  )}
+              </h2>
           </div>
 
           {/* Meta Grid */}
@@ -265,6 +273,28 @@ export const ClientTaskForm: React.FC<ClientTaskFormProps> = ({ isOpen, onClose,
                         onChange={e => setFormData({...formData, dueDate: e.target.value})}
                     />
                 </div>
+            </div>
+
+            {/* Main Board Toggle */}
+            <div className="flex items-center justify-between p-4 bg-indigo-50/50 rounded-xl border border-indigo-100 mt-2">
+                <div className="flex gap-3">
+                    <div className="p-2 bg-indigo-100 text-indigo-600 rounded-lg h-fit">
+                        <Layout className="h-5 w-5" />
+                    </div>
+                    <div>
+                        <h4 className="text-sm font-bold text-gray-900">Pin to Main Dashboard</h4>
+                        <p className="text-xs text-gray-500 mt-0.5">Make this task visible on the global task board.</p>
+                    </div>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer">
+                    <input 
+                        type="checkbox" 
+                        className="sr-only peer" 
+                        checked={formData.isVisibleOnMainBoard || false}
+                        onChange={e => setFormData({...formData, isVisibleOnMainBoard: e.target.checked})}
+                    />
+                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                </label>
             </div>
 
             <div className="flex justify-end gap-3 pt-6 border-t border-gray-50">

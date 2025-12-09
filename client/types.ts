@@ -83,6 +83,7 @@ export interface Task {
   createdAt: string;
   lastUpdatedBy?: string;
   lastUpdatedAt?: string;
+  isVisibleOnMainBoard?: boolean; // Flag to show on main dashboard
 }
 
 export interface TaskFilterState {

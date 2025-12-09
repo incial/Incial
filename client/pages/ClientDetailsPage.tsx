@@ -11,7 +11,7 @@ import { TasksKanban } from '../components/tasks/TasksKanban';
 import { TasksCalendar } from '../components/tasks/TasksCalendar';
 import { TasksFilter } from '../components/tasks/TasksFilter';
 import { DeleteConfirmationModal } from '../components/ui/DeleteConfirmationModal';
-import { CheckCircle, Plus, HardDrive, LayoutList, Calendar as CalendarIcon, User, Info, ArrowLeft, ExternalLink, Kanban } from 'lucide-react';
+import { CheckCircle, Plus, HardDrive, LayoutList, Calendar as CalendarIcon, User, Info, ArrowLeft, ExternalLink, Kanban, Archive, ChevronDown, ChevronRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 type ViewMode = 'list' | 'kanban' | 'mine' | 'calendar';
@@ -28,6 +28,7 @@ export const ClientDetailsPage: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | undefined>(undefined);
   const [deleteId, setDeleteId] = useState<number | null>(null);
+  const [isCompletedExpanded, setIsCompletedExpanded] = useState(false);
 
   // Filters State
   const [filters, setFilters] = useState<TaskFilterState>({
@@ -58,7 +59,8 @@ export const ClientDetailsPage: React.FC = () => {
     fetchData();
   }, [id]);
 
-  const filteredTasks = useMemo(() => {
+  // Base filtering based on search/dropdowns
+  const filteredBaseTasks = useMemo(() => {
     let result = tasks.filter(t => {
       const matchesSearch = t.title.toLowerCase().includes(filters.search.toLowerCase());
       const matchesStatus = filters.status === '' || t.status === filters.status;
@@ -70,9 +72,19 @@ export const ClientDetailsPage: React.FC = () => {
     if (viewMode === 'mine' && user) {
         result = result.filter(t => t.assignedTo === user.name);
     }
-
+    
     return result.sort((a, b) => new Date(b.dueDate).getTime() - new Date(a.dueDate).getTime());
   }, [tasks, viewMode, user, filters]);
+
+  // Split tasks for the "List" view
+  const { activeTasks, completedTasks } = useMemo(() => {
+      const active = filteredBaseTasks.filter(t => t.status !== 'Completed' && t.status !== 'Done');
+      const completed = filteredBaseTasks.filter(t => t.status === 'Completed' || t.status === 'Done');
+      // Sort completed by newest update
+      completed.sort((a, b) => new Date(b.lastUpdatedAt || b.createdAt).getTime() - new Date(a.lastUpdatedAt || a.createdAt).getTime());
+      return { activeTasks: active, completedTasks: completed };
+  }, [filteredBaseTasks]);
+
 
   const handleCreate = () => {
       setEditingTask(undefined);
@@ -223,19 +235,54 @@ export const ClientDetailsPage: React.FC = () => {
                 <div className="flex-1 overflow-y-auto bg-white p-0">
                     {/* LIST or MINE view */}
                     {(viewMode === 'list' || viewMode === 'mine') && (
-                        <ClientTaskTable 
-                            tasks={filteredTasks} 
-                            onEdit={handleEdit} 
-                            onDelete={(id) => setDeleteId(id)} 
-                            onStatusChange={handleStatusChange}
-                        />
+                        <div>
+                             {/* Active Section */}
+                             <div className="p-4 bg-gray-50/50 border-b border-gray-100 flex items-center gap-2">
+                                <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+                                <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wide">Active Queue ({activeTasks.length})</h3>
+                             </div>
+                             
+                             <ClientTaskTable 
+                                tasks={activeTasks} 
+                                onEdit={handleEdit} 
+                                onDelete={(id) => setDeleteId(id)} 
+                                onStatusChange={handleStatusChange}
+                            />
+
+                            {/* Completed Section */}
+                            {completedTasks.length > 0 && (
+                                <div className="border-t border-gray-100 mt-4">
+                                     <button 
+                                        onClick={() => setIsCompletedExpanded(!isCompletedExpanded)}
+                                        className="w-full flex items-center gap-2 p-4 bg-gray-50 hover:bg-gray-100 transition-colors text-left"
+                                    >
+                                        {isCompletedExpanded ? <ChevronDown className="h-4 w-4 text-gray-400" /> : <ChevronRight className="h-4 w-4 text-gray-400" />}
+                                        <Archive className="h-4 w-4 text-gray-500" />
+                                        <h3 className="text-xs font-bold text-gray-600 uppercase tracking-wide">
+                                            Completed Archives ({completedTasks.length})
+                                        </h3>
+                                    </button>
+
+                                    {isCompletedExpanded && (
+                                        <div className="opacity-75 grayscale-[0.3] bg-gray-50/30">
+                                            <ClientTaskTable 
+                                                tasks={completedTasks} 
+                                                onEdit={handleEdit} 
+                                                onDelete={(id) => setDeleteId(id)} 
+                                                onStatusChange={handleStatusChange}
+                                            />
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
                     )}
 
                     {/* KANBAN view */}
                     {viewMode === 'kanban' && (
                         <div className="h-full p-6 bg-gray-50/30">
                             <TasksKanban 
-                                tasks={filteredTasks} 
+                                tasks={filteredBaseTasks} 
                                 onEdit={handleEdit} 
                                 onStatusChange={handleStatusChange} 
                             />
@@ -245,13 +292,13 @@ export const ClientDetailsPage: React.FC = () => {
                     {/* CALENDAR view */}
                     {viewMode === 'calendar' && (
                         <div className="h-full p-6">
-                            <TasksCalendar tasks={filteredTasks} onEdit={handleEdit} />
+                            <TasksCalendar tasks={filteredBaseTasks} onEdit={handleEdit} />
                         </div>
                     )}
                 </div>
                 
                 <div className="p-3 border-t border-gray-50 bg-white text-xs font-medium text-gray-400 flex justify-between">
-                    <span>{filteredTasks.length} tasks visible</span>
+                    <span>{filteredBaseTasks.length} total tasks</span>
                 </div>
            </div>
 
