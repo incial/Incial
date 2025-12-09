@@ -29,22 +29,8 @@ export const CompaniesForm: React.FC<CompaniesFormProps> = ({ isOpen, onClose, o
   const [formData, setFormData] = useState<Partial<CRMEntry>>({});
   
   useEffect(() => {
-    if (isOpen) {
-        if (initialData) {
-            setFormData(initialData);
-        } else {
-            // Reset for Create Mode
-            setFormData({
-                company: '',
-                contactName: '',
-                // Default Reference ID logic - just visual here, backend handles logic or we send it
-                referenceId: `REF-${new Date().getFullYear()}-${Math.floor(100 + Math.random() * 900)}`,
-                work: [],
-                status: 'on progress', // Default to 'on progress' instead of 'not_started'
-                driveLink: '',
-                socials: {}
-            });
-        }
+    if (isOpen && initialData) {
+        setFormData(initialData);
     }
   }, [initialData, isOpen]);
 
@@ -85,7 +71,7 @@ export const CompaniesForm: React.FC<CompaniesFormProps> = ({ isOpen, onClose, o
         {/* Modal Header */}
         <div className="flex items-center justify-between p-5 border-b border-gray-100 bg-white z-10">
           <h2 className="text-xl font-bold text-gray-800">
-            {initialData ? 'Edit Company' : 'Add New Company'}
+            Edit Company Details
           </h2>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 p-2 rounded-full transition-colors">
               <X className="h-5 w-5" />
@@ -129,6 +115,7 @@ export const CompaniesForm: React.FC<CompaniesFormProps> = ({ isOpen, onClose, o
                     </div>
                 </div>
 
+                {/* Contact Person (Full Width) */}
                 <div className="w-full">
                     <label className="block mb-1.5 text-sm font-medium text-gray-700">Contact Person</label>
                     <div className="relative">
@@ -288,7 +275,7 @@ export const CompaniesForm: React.FC<CompaniesFormProps> = ({ isOpen, onClose, o
                         Cancel
                     </button>
                     <button type="submit" className="px-5 py-2.5 text-white bg-brand-600 hover:bg-brand-700 rounded-lg transition-colors font-medium flex items-center gap-2 shadow-lg shadow-brand-500/30">
-                        <Save className="h-4 w-4" /> Save Company
+                        <Save className="h-4 w-4" /> Save Changes
                     </button>
                 </div>
             </form>

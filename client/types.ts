@@ -1,5 +1,4 @@
 
-
 export type CRMStatus = 'onboarded' | 'drop' | 'on progress' | 'Quote Sent' | 'lead' | 'completed';
 
 export interface User {
@@ -33,6 +32,7 @@ export interface CRMEntry {
   email: string;
   contactName: string;
   assignedTo: string;
+  address?: string; // Added Address field
   lastContact: string; // ISO Date string YYYY-MM-DD
   nextFollowUp: string; // ISO Date string YYYY-MM-DD
   dealValue: number;

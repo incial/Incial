@@ -8,9 +8,8 @@ import { CompanyDetailsModal } from '../components/companies/CompanyDetailsModal
 import { CompaniesForm } from '../components/companies/CompaniesForm';
 import { DeleteConfirmationModal } from '../components/ui/DeleteConfirmationModal';
 import { CRMEntry, CompanyFilterState } from '../types';
-import { Briefcase, Building, Archive, ArrowRight, CheckCircle, Plus } from 'lucide-react';
+import { Briefcase, Building, Archive, CheckCircle } from 'lucide-react';
 import { crmApi } from '../services/api';
-import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 export const CompaniesPage: React.FC = () => {
@@ -88,16 +87,11 @@ export const CompaniesPage: React.FC = () => {
 
   const handleEdit = (company: CRMEntry) => {
       setEditingCompany(company);
+      setIsViewModalOpen(false); // Close view modal if open
       setIsEditModalOpen(true);
   };
 
-  const handleCreate = () => {
-      setEditingCompany(undefined);
-      setIsEditModalOpen(true);
-  }
-
   const handleUpdateCompany = async (updatedData: Partial<CRMEntry>) => {
-      // Logic for both Create and Update
       if (editingCompany) {
           // Update Existing
           const updatedEntry: CRMEntry = {
@@ -111,30 +105,7 @@ export const CompaniesPage: React.FC = () => {
           setCrmEntries(newEntries);
           await crmApi.update(updatedEntry.id, updatedEntry);
           localStorage.setItem('mock_crm_data', JSON.stringify(newEntries));
-
-      } else {
-          // Create New
-          const newEntryData = {
-              ...updatedData,
-              lastUpdatedBy: user?.name || 'Unknown',
-              lastUpdatedAt: new Date().toISOString(),
-              // Ensure basic fields for CRM Entry are present
-              assignedTo: updatedData.assignedTo || 'Vallapata',
-              dealValue: 0,
-              phone: '',
-              email: '',
-              tags: [],
-              leadSources: [],
-              lastContact: new Date().toISOString(),
-              nextFollowUp: new Date().toISOString()
-          };
-          
-          const newEntry = await crmApi.create(newEntryData as CRMEntry);
-          const newEntries = [newEntry, ...crmEntries];
-          setCrmEntries(newEntries);
-          localStorage.setItem('mock_crm_data', JSON.stringify(newEntries));
       }
-
       setIsEditModalOpen(false);
   };
 
@@ -198,21 +169,6 @@ export const CompaniesPage: React.FC = () => {
                     <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Companies Registry</h1>
                     <p className="text-gray-500 mt-1 font-medium">Unified directory of all active accounts and past projects.</p>
                 </div>
-            </div>
-            <div className="flex gap-3">
-                 <button 
-                    onClick={handleCreate}
-                    className="bg-brand-600 hover:bg-brand-700 text-white px-5 py-2.5 rounded-xl flex items-center gap-2 font-semibold shadow-lg shadow-brand-500/30 transition-all active:scale-95"
-                 >
-                    <Plus className="h-5 w-5" />
-                    New Company
-                 </button>
-                <Link 
-                    to="/crm"
-                    className="bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 px-5 py-2.5 rounded-xl flex items-center gap-2 font-semibold transition-all shadow-sm"
-                >
-                    Go to CRM <ArrowRight className="h-4 w-4" />
-                </Link>
             </div>
           </div>
 
@@ -288,6 +244,7 @@ export const CompaniesPage: React.FC = () => {
         <CompanyDetailsModal 
             isOpen={isViewModalOpen}
             onClose={() => setIsViewModalOpen(false)}
+            onEdit={handleEdit}
             company={viewingCompany}
         />
         

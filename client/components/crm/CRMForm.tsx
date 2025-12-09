@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { X, Save, Edit2, User, Phone, Mail, Calendar, Briefcase, FileText, Tag, DollarSign, CheckCircle, Clock, AlertCircle, History, ExternalLink, HardDrive, Linkedin, Instagram, Facebook, Twitter, Globe, Link as LinkIcon, Maximize2, Minimize2 } from 'lucide-react';
+import { X, Save, Edit2, User, Phone, Mail, Calendar, Briefcase, FileText, Tag, DollarSign, CheckCircle, Clock, AlertCircle, History, ExternalLink, HardDrive, Linkedin, Instagram, Facebook, Twitter, Globe, Link as LinkIcon, Maximize2, Minimize2, MapPin } from 'lucide-react';
 import { CRMEntry, SocialLinks } from '../../types';
 import { getStatusStyles, formatDate, getFollowUpColor, formatMoney } from '../../utils';
 import { CustomDatePicker } from '../ui/CustomDatePicker';
@@ -75,6 +75,8 @@ export const CRMForm: React.FC<CRMFormProps> = ({ isOpen, onClose, onSubmit, ini
                 work: [],
                 leadSources: [],
                 driveLink: '',
+                address: '',
+                referenceId: '',
                 socials: {},
                 lastContact: new Date().toISOString().split('T')[0],
                 nextFollowUp: new Date().toISOString().split('T')[0],
@@ -148,7 +150,14 @@ export const CRMForm: React.FC<CRMFormProps> = ({ isOpen, onClose, onSubmit, ini
         <div className="bg-gray-50 rounded-xl p-5 border border-gray-200">
             <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
                 <div>
-                    <h2 className="text-2xl font-bold text-gray-900">{formData.company}</h2>
+                    <div className="flex items-center gap-3">
+                        <h2 className="text-2xl font-bold text-gray-900">{formData.company}</h2>
+                        {formData.referenceId && (
+                            <span className="px-2 py-0.5 rounded-md bg-gray-200 text-gray-600 text-xs font-mono font-bold border border-gray-300">
+                                {formData.referenceId}
+                            </span>
+                        )}
+                    </div>
                     <div className="flex items-center gap-2 mt-1 text-gray-600">
                         <User className="h-4 w-4 text-gray-400" />
                         <span className="font-medium">{formData.contactName}</span>
@@ -228,6 +237,17 @@ export const CRMForm: React.FC<CRMFormProps> = ({ isOpen, onClose, onSubmit, ini
                                 </p>
                             </div>
                         </div>
+                        {formData.address && (
+                            <div className="flex items-center gap-3">
+                                <div className="h-8 w-8 rounded-lg bg-gray-50 flex items-center justify-center">
+                                    <MapPin className="h-4 w-4 text-gray-500" />
+                                </div>
+                                <div>
+                                    <p className="text-xs text-gray-500">Address</p>
+                                    <p className="text-sm font-medium text-gray-900">{formData.address}</p>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
 
@@ -405,6 +425,16 @@ export const CRMForm: React.FC<CRMFormProps> = ({ isOpen, onClose, onSubmit, ini
                     </div>
                </div>
 
+               <div className="w-full">
+                    <label className="block mb-1.5 text-sm font-medium text-gray-700">Address</label>
+                    <textarea 
+                        className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-brand-500 focus:outline-none resize-none h-20"
+                        placeholder="Full street address..."
+                        value={formData.address || ''} 
+                        onChange={e => setFormData({...formData, address: e.target.value})} 
+                    />
+               </div>
+
                {/* Social Media Inputs */}
                <div className="pt-4 border-t border-gray-50">
                     <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Online Presence</h4>
@@ -477,6 +507,13 @@ export const CRMForm: React.FC<CRMFormProps> = ({ isOpen, onClose, onSubmit, ini
             <div className="space-y-6">
                 <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest border-b border-gray-100 pb-2 mb-4">Deal Details</h3>
                 
+                <div className="w-full">
+                    <label className="block mb-1.5 text-sm font-medium text-gray-700">Reference ID</label>
+                    <input type="text" className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-brand-500 focus:outline-none bg-gray-50 text-gray-600 font-mono text-sm" 
+                    placeholder="Auto-generated or Enter ID"
+                    value={formData.referenceId || ''} onChange={e => setFormData({...formData, referenceId: e.target.value})} />
+                </div>
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <div className="w-full">
                         <label className="block mb-1.5 text-sm font-medium text-gray-700">Deal Value (₹)</label>
