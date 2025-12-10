@@ -29,6 +29,23 @@ export const LoginPage: React.FC = () => {
     }
   };
 
+  const handleGoogleLogin = () => {
+      // Mock Google Login Logic
+      // In a real app, this would redirect to backend /api/v1/auth/google
+      setIsLoading(true);
+      setTimeout(() => {
+          login("mock-jwt-google", {
+              id: 99,
+              name: "Google User",
+              email: "user@gmail.com",
+              role: "ROLE_EMPLOYEE",
+              googleId: "google-12345",
+              avatarUrl: "https://lh3.googleusercontent.com/a/default-user=s96-c"
+          });
+          setIsLoading(false);
+      }, 1000);
+  };
+
   const fillCredentials = (role: DemoRole) => {
       switch(role) {
           case 'super':
@@ -92,14 +109,14 @@ export const LoginPage: React.FC = () => {
 
       {/* Right Panel - Form */}
       <div className="flex-1 flex items-center justify-center p-6 lg:p-12 relative bg-white">
-         <div className="w-full max-w-md space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
+         <div className="w-full max-w-md space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="text-center lg:text-left">
                 <img src="/logo.png" alt="Incial" className="lg:hidden h-12 w-12 rounded-xl bg-white shadow-lg object-contain p-1 mx-auto mb-6" />
                 <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Welcome back</h1>
                 <p className="text-gray-500 mt-2 text-lg">Please enter your details to sign in.</p>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-5">
                 {error && (
                     <div className="p-4 rounded-xl bg-red-50 border border-red-100 text-red-600 text-sm font-medium animate-in fade-in slide-in-from-top-2 flex items-center gap-2">
                         <span className="h-1.5 w-1.5 rounded-full bg-red-600" />
@@ -158,7 +175,7 @@ export const LoginPage: React.FC = () => {
                          <div className="h-5 w-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                     ) : (
                         <>
-                            Sign in
+                            Sign in with Email
                             <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
                         </>
                     )}
@@ -170,11 +187,32 @@ export const LoginPage: React.FC = () => {
                     <div className="w-full border-t border-gray-200" />
                 </div>
                 <div className="relative flex justify-center text-sm">
-                    <span className="px-4 bg-white text-gray-500 font-medium">Demo Roles</span>
+                    <span className="px-4 bg-white text-gray-500 font-medium">Or continue with</span>
                 </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <button
+                type="button"
+                onClick={handleGoogleLogin}
+                disabled={isLoading}
+                className="w-full bg-white border border-gray-200 text-gray-700 font-bold py-3.5 rounded-xl transition-all shadow-sm hover:shadow-md flex items-center justify-center gap-3 hover:bg-gray-50 active:scale-[0.99] disabled:opacity-70"
+            >
+                {isLoading ? (
+                    <div className="h-5 w-5 border-2 border-gray-400/30 border-t-gray-600 rounded-full animate-spin" />
+                ) : (
+                    <>
+                        <svg className="h-5 w-5" viewBox="0 0 24 24">
+                            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
+                            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
+                            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
+                            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
+                        </svg>
+                        Sign in with Google
+                    </>
+                )}
+            </button>
+
+            <div className="grid grid-cols-2 gap-3 mt-6">
                 <button 
                     onClick={() => fillCredentials('super')}
                     className="p-2.5 border border-gray-200 rounded-xl text-left hover:border-brand-500 hover:bg-brand-50/50 transition-all group"
