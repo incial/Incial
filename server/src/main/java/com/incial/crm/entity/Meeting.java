@@ -1,5 +1,6 @@
 package com.incial.crm.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,6 +24,7 @@ public class Meeting {
     private String title;
 
     @Column(name = "date_time", nullable = false)
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     private LocalDateTime dateTime;
 
     @Column(length = 50)

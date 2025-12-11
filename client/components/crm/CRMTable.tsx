@@ -11,8 +11,9 @@ interface CRMTableProps {
   onDelete: (id: number) => void;
 }
 
-const AvatarPlaceholder = ({ name }: { name: string }) => {
-    const initials = name
+const AvatarPlaceholder = ({ name }: { name?: string }) => {
+    const safeName = name || 'Unknown';
+    const initials = safeName
         .split(' ')
         .map(n => n[0])
         .slice(0, 2)
@@ -28,7 +29,7 @@ const AvatarPlaceholder = ({ name }: { name: string }) => {
         'bg-rose-100 text-rose-700',
         'bg-violet-100 text-violet-700'
     ];
-    const colorClass = colors[name.length % colors.length];
+    const colorClass = colors[safeName.length % colors.length];
 
     return (
         <div className={`h-9 w-9 rounded-full ${colorClass} flex items-center justify-center text-xs font-bold ring-2 ring-white shadow-sm`}>
@@ -81,8 +82,8 @@ export const CRMTable: React.FC<CRMTableProps> = ({ data, isLoading, onView, onD
                 <div className="flex items-center gap-4">
                   <AvatarPlaceholder name={row.contactName} />
                   <div className="flex flex-col">
-                    <span className="font-bold text-gray-900 text-sm group-hover:text-brand-600 transition-colors">{row.contactName}</span>
-                    <span className="text-xs font-medium text-gray-500">{row.company}</span>
+                    <span className="font-bold text-gray-900 text-sm group-hover:text-brand-600 transition-colors">{row.contactName || 'No Name'}</span>
+                    <span className="text-xs font-medium text-gray-500">{row.company || 'No Company'}</span>
                     
                     {/* Hover Quick Actions */}
                     <div className="flex gap-3 mt-1.5 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0">
@@ -114,17 +115,17 @@ export const CRMTable: React.FC<CRMTableProps> = ({ data, isLoading, onView, onD
               {/* Tags/Work */}
               <td className="px-6 py-4">
                  <div className="flex flex-wrap gap-1.5 max-w-[220px]">
-                    {row.tags.slice(0, 2).map(tag => (
+                    {(row.tags || []).slice(0, 2).map(tag => (
                         <span key={tag} className="px-2 py-1 bg-purple-50 text-purple-700 text-[10px] font-semibold rounded-md border border-purple-100/50">{tag}</span>
                     ))}
-                    {row.work.slice(0, 2).map((w: any) => {
+                    {(row.work || []).slice(0, 2).map((w: any) => {
                          const label = typeof w === 'object' ? w.name : w;
                          return (
                             <span key={label} className="px-2 py-1 bg-blue-50 text-blue-700 text-[10px] font-semibold rounded-md border border-blue-100/50">{label}</span>
                          );
                     })}
-                    {(row.tags.length + row.work.length) > 4 && (
-                        <span className="px-2 py-1 text-[10px] font-medium text-gray-400 bg-gray-50 rounded-md">+{row.tags.length + row.work.length - 4}</span>
+                    {((row.tags || []).length + (row.work || []).length) > 4 && (
+                        <span className="px-2 py-1 text-[10px] font-medium text-gray-400 bg-gray-50 rounded-md">+{ (row.tags || []).length + (row.work || []).length - 4}</span>
                     )}
                  </div>
               </td>
@@ -143,9 +144,9 @@ export const CRMTable: React.FC<CRMTableProps> = ({ data, isLoading, onView, onD
               <td className="px-6 py-4">
                 <div className="flex items-center gap-2">
                     <div className="h-6 w-6 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 text-[10px] flex items-center justify-center text-gray-600 font-bold border border-white shadow-sm">
-                        {row.assignedTo.charAt(0)}
+                        {row.assignedTo ? row.assignedTo.charAt(0).toUpperCase() : '?'}
                     </div>
-                    <span className="text-sm text-gray-600 font-medium">{row.assignedTo}</span>
+                    <span className="text-sm text-gray-600 font-medium">{row.assignedTo || 'Unassigned'}</span>
                 </div>
               </td>
 

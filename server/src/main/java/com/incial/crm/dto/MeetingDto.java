@@ -16,8 +16,8 @@ import java.time.LocalDateTime;
 public class MeetingDto {
     private Long id;
     private String title;
-    
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'")
+
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     private LocalDateTime dateTime;
     
     private String status;

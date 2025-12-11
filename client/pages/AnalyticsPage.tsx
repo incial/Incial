@@ -42,32 +42,91 @@ export const AnalyticsPage: React.FC<AnalyticsPageProps> = ({ title }) => {
         if (!window.confirm(`Are you sure you want to export ${type.toUpperCase()} data to CSV?`)) return;
 
         try {
-            let data: any[] = [];
+            let csvContent = "";
             let filename = `${type}_export_${new Date().toISOString().split('T')[0]}.csv`;
 
             if (type === 'crm') {
                 const res = await crmApi.getAll();
-                data = res.crmList;
+                const data = res.crmList;
+                
+                if (!data || data.length === 0) { alert("No data available to export."); return; }
+
+                // Define Headers for CRM
+                const headers = [
+                    "SI No", "Reference ID", "Company", "Contact Name", "Email", "Phone", 
+                    "Status", "Deal Value", "Assigned To", "Lead Source", 
+                    "Tags", "Work Types", "Next Follow Up", "Last Contact", 
+                    "Website", "LinkedIn", "Notes", "Address"
+                ];
+                
+                csvContent += headers.join(",") + "\n";
+
+                // Map Rows
+                data.forEach((item, index) => {
+                    const row = [
+                        index + 1,
+                        item.referenceId || "",
+                        `"${(item.company || "").replace(/"/g, '""')}"`,
+                        `"${(item.contactName || "").replace(/"/g, '""')}"`,
+                        item.email || "",
+                        item.phone ? `"${item.phone}"` : "",
+                        item.status || "",
+                        item.dealValue || 0,
+                        item.assignedTo || "Unassigned",
+                        `"${(item.leadSources || []).join("; ")}"`,
+                        `"${(item.tags || []).join("; ")}"`,
+                        `"${(item.work || []).map(w => (w && typeof w === 'object') ? (w as any).name : w).join("; ")}"`, // Handle legacy object structure if present
+                        item.nextFollowUp || "",
+                        item.lastContact || "",
+                        item.socials?.website || "",
+                        item.socials?.linkedin || "",
+                        `"${(item.notes || "").replace(/"/g, '""').replace(/\n/g, ' ')}"`, // Escape newlines in notes
+                        `"${(item.address || "").replace(/"/g, '""')}"`
+                    ];
+                    csvContent += row.join(",") + "\n";
+                });
+
             } else if (type === 'tasks') {
-                data = await tasksApi.getAll();
+                const [tasksData, crmData] = await Promise.all([
+                    tasksApi.getAll(),
+                    crmApi.getAll()
+                ]);
+                
+                // Create lookup for Company Names
+                const companyMap: Record<number, string> = {};
+                crmData.crmList.forEach(c => companyMap[c.id] = c.company);
+
+                if (!tasksData || tasksData.length === 0) { alert("No data available to export."); return; }
+
+                // Define Headers for Tasks
+                const headers = [
+                    "SI No", "Title", "Status", "Priority", "Task Type", 
+                    "Assigned To", "Client / Company", "Due Date", 
+                    "Link", "Description", "Created At"
+                ];
+                
+                csvContent += headers.join(",") + "\n";
+
+                tasksData.forEach((task, index) => {
+                    const clientName = task.companyId ? companyMap[task.companyId] || "Unknown Client" : "Internal";
+                    
+                    const row = [
+                        index + 1,
+                        `"${(task.title || "").replace(/"/g, '""')}"`,
+                        task.status || "",
+                        task.priority || "",
+                        task.taskType || "",
+                        task.assignedTo || "Unassigned",
+                        `"${clientName.replace(/"/g, '""')}"`,
+                        task.dueDate || "",
+                        task.taskLink || "",
+                        `"${(task.description || "").replace(/"/g, '""').replace(/\n/g, ' ')}"`,
+                        task.createdAt ? new Date(task.createdAt).toLocaleDateString() : ""
+                    ];
+                    csvContent += row.join(",") + "\n";
+                });
             }
 
-            if (!data || data.length === 0) {
-                alert("No data available to export.");
-                return;
-            }
-
-            // Convert to CSV
-            const headers = Object.keys(data[0]).join(',');
-            const rows = data.map(obj => 
-                Object.values(obj).map(val => {
-                    if (val === null || val === undefined) return '';
-                    if (typeof val === 'object') return `"${JSON.stringify(val).replace(/"/g, '""')}"`;
-                    return `"${String(val).replace(/"/g, '""')}"`;
-                }).join(',')
-            );
-            const csvContent = [headers, ...rows].join('\n');
-            
             // Trigger Download
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement("a");
