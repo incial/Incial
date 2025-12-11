@@ -57,6 +57,8 @@ public class UserService {
                 .email(entity.getEmail())
                 .role(entity.getRole())
                 .tasksCompleted(entity.getTasksCompleted())
+                .googleId(entity.getGoogleId())
+                .avatarUrl(entity.getAvatarUrl())
                 .createdAt(entity.getCreatedAt())
                 .build();
     }

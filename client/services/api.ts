@@ -19,6 +19,19 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+// Response Interceptor to handle Token Expiration (401/403)
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    // Check for Unauthorized (401) or Forbidden (403) which usually means token expired/invalid
+    if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+        // Dispatch a custom event that AuthContext will listen to
+        window.dispatchEvent(new Event('auth:unauthorized'));
+    }
+    return Promise.reject(error);
+  }
+);
+
 // Helper to extract error message from backend response
 const handleApiError = (error: any) => {
     if (error.response) {
@@ -39,9 +52,8 @@ const handleApiError = (error: any) => {
 // Helper to clean payload
 // 1. Removes id, createdAt, lastUpdatedAt (backend handled)
 // 2. Removes keys with empty string values (prevents unique constraint/validation errors)
-// 3. Removes empty objects (e.g., socials: {} becomes omitted entirely)
-// 4. Preserves empty arrays (Backend converters handle empty arrays correctly)
-const cleanPayload = <T extends Record<string, any>>(data: T): Partial<T> | Partial<any>[] => {
+// 3. Preserves empty objects/arrays (Backend converters often prefer {}/[] over null)
+const cleanPayload = (data: any): any => {
     if (Array.isArray(data)) {
         return data.map(cleanPayload);
     }
@@ -57,19 +69,12 @@ const cleanPayload = <T extends Record<string, any>>(data: T): Partial<T> | Part
 
             const value = data[key];
 
-            // Recursively clean nested objects
+            // Recursively clean objects
             if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
                 const cleanedObj = cleanPayload(value);
-                // Only include object if it has at least one property after cleaning
-                if (Object.keys(cleanedObj).length > 0) {
-                    cleaned[key] = cleanedObj;
-                }
-                // Otherwise omit the key entirely (don't send empty objects)
+                // Keep the object even if empty (e.g. socials: {}) to avoid NPE in backend converters
+                cleaned[key] = cleanedObj;
             } 
-            // Keep arrays even if empty (backend handles empty arrays correctly)
-            else if (Array.isArray(value)) {
-                cleaned[key] = value;
-            }
             // Keep non-empty values (0 is valid for numbers, false is valid for booleans)
             else if (value !== "" && value !== null && value !== undefined) {
                 cleaned[key] = value;

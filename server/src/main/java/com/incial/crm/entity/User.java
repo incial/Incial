@@ -34,6 +34,12 @@ public class User {
     @Column(name = "tasks_completed", nullable = false)
     private Integer tasksCompleted = 0;
 
+    @Column(name = "google_id", unique = true, length = 255)
+    private String googleId;
+
+    @Column(name = "avatar_url", length = 512)
+    private String avatarUrl;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 

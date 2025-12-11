@@ -17,5 +17,7 @@ public class UserDto {
     private String email;
     private String role;
     private Integer tasksCompleted;
+    private String googleId;
+    private String avatarUrl;
     private LocalDateTime createdAt;
 }

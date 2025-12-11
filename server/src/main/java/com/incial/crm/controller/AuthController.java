@@ -30,4 +30,10 @@ public class AuthController {
         LoginResponse response = authService.login(request);
         return ResponseEntity.ok(response);
     }
+
+    @PostMapping("/google-login")
+    public ResponseEntity<LoginResponse> googleLogin(@Valid @RequestBody com.incial.crm.dto.GoogleLoginRequest request) {
+        LoginResponse response = authService.loginWithGoogle(request);
+        return ResponseEntity.ok(response);
+    }
 }
