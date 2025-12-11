@@ -19,29 +19,19 @@ export const LoginPage: React.FC = () => {
     
     try {
       const response = await authApi.login(email, password);
+      // Ensure backend returns these fields. If user/role is inside user object, adjust accordingly.
+      // Based on previous spec: response.user contains the user details
       login(response.token, response.user);
     } catch (err: any) {
-      setError(err.message || 'Login failed');
+      setError(err.message || 'Login failed. Please check your credentials.');
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleGoogleLogin = () => {
-      // Mock Google Login Logic
-      // In a real app, this would redirect to backend /api/v1/auth/google
-      setIsLoading(true);
-      setTimeout(() => {
-          login("mock-jwt-google", {
-              id: 99,
-              name: "Google User",
-              email: "user@gmail.com",
-              role: "ROLE_EMPLOYEE",
-              googleId: "google-12345",
-              avatarUrl: "https://lh3.googleusercontent.com/a/default-user=s96-c"
-          });
-          setIsLoading(false);
-      }, 1000);
+      // Future integration point for backend OAuth
+      alert("Google Login is not yet configured in the backend.");
   };
 
   return (
@@ -111,7 +101,7 @@ export const LoginPage: React.FC = () => {
                                 value={email}
                                 onChange={e => setEmail(e.target.value)}
                                 className="w-full pl-12 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 focus:bg-white transition-all font-medium"
-                                placeholder="name@gmail.com"
+                                placeholder="name@incial.com"
                                 required
                             />
                         </div>
