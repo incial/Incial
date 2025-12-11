@@ -9,6 +9,8 @@ export interface User {
   email: string;
   role: UserRole;
   companyId?: number; // For Client Role
+  googleId?: string; // For Google OAuth users
+  avatarUrl?: string; // Profile picture from Google
 }
 
 export interface AuthResponse {

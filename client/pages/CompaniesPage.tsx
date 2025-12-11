@@ -47,13 +47,10 @@ export const CompaniesPage: React.FC = () => {
     fetchData();
   }, []);
 
-  // Filter out Leads - We only want "Companies"
-  // Rule: Exclude 'lead' status.
   const allCompanies = useMemo(() => {
     return crmEntries.filter(entry => entry.status !== 'lead');
   }, [crmEntries]);
 
-  // Separate into Active, Dropped, and Past
   const categorizedData = useMemo(() => {
       const active = allCompanies.filter(c => 
           ['onboarded', 'on progress', 'Quote Sent'].includes(c.status)
@@ -63,7 +60,6 @@ export const CompaniesPage: React.FC = () => {
       return { active, dropped, past };
   }, [allCompanies]);
 
-  // Filtering & Sorting
   const displayData = useMemo(() => {
     let sourceList = categorizedData.active;
     if (activeTab === 'dropped') sourceList = categorizedData.dropped;
@@ -81,19 +77,17 @@ export const CompaniesPage: React.FC = () => {
       return matchesSearch && matchesStatus && matchesWork;
     });
 
-    // Default Sort: ID Descending (Newest first)
     return result.sort((a, b) => b.id - a.id);
   }, [categorizedData, activeTab, filters]);
 
   const handleEdit = (company: CRMEntry) => {
       setEditingCompany(company);
-      setIsViewModalOpen(false); // Close view modal if open
+      setIsViewModalOpen(false);
       setIsEditModalOpen(true);
   };
 
   const handleUpdateCompany = async (updatedData: Partial<CRMEntry>) => {
       if (editingCompany) {
-          // Update Existing
           const updatedEntry: CRMEntry = {
               ...editingCompany,
               ...updatedData,
@@ -101,12 +95,15 @@ export const CompaniesPage: React.FC = () => {
               lastUpdatedAt: new Date().toISOString()
           };
           
-          const newEntries = crmEntries.map(e => e.id === updatedEntry.id ? updatedEntry : e);
-          setCrmEntries(newEntries);
-          await crmApi.update(updatedEntry.id, updatedEntry);
-          localStorage.setItem('mock_crm_data', JSON.stringify(newEntries));
+          setCrmEntries(crmEntries.map(e => e.id === updatedEntry.id ? updatedEntry : e));
+          setIsEditModalOpen(false);
+          
+          try {
+            await crmApi.update(updatedEntry.id, updatedEntry);
+          } catch(e) {
+            fetchData();
+          }
       }
-      setIsEditModalOpen(false);
   };
 
   const handleView = (company: CRMEntry) => {
@@ -122,17 +119,14 @@ export const CompaniesPage: React.FC = () => {
       if(!deleteId) return;
       const id = deleteId;
       
-      // Optimistic Update
-      const newEntries = crmEntries.filter(e => e.id !== id);
-      setCrmEntries(newEntries);
+      setCrmEntries(crmEntries.filter(e => e.id !== id));
       setDeleteId(null);
 
       try {
           await crmApi.delete(id);
-          localStorage.setItem('mock_crm_data', JSON.stringify(newEntries));
       } catch (err) {
           alert("Failed to delete");
-          fetchData(); // Revert
+          fetchData();
       }
   };
 
@@ -145,7 +139,6 @@ export const CompaniesPage: React.FC = () => {
       }
   }
 
-  // Helper to get name for delete modal
   const itemToDeleteName = useMemo(() => {
       if (!deleteId) return '';
       const item = crmEntries.find(e => e.id === deleteId);
@@ -174,7 +167,6 @@ export const CompaniesPage: React.FC = () => {
 
           <div className="bg-white rounded-3xl shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] border border-gray-100/50 flex flex-col flex-1 overflow-hidden">
             
-            {/* Tabs */}
             <div className="flex items-center gap-1 p-2 border-b border-gray-100 bg-gray-50/50 overflow-x-auto">
                 <button 
                     onClick={() => setActiveTab('active')}

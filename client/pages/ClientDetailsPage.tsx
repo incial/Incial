@@ -59,7 +59,6 @@ export const ClientDetailsPage: React.FC = () => {
     fetchData();
   }, [id]);
 
-  // Base filtering based on search/dropdowns
   const filteredBaseTasks = useMemo(() => {
     let result = tasks.filter(t => {
       const matchesSearch = t.title.toLowerCase().includes(filters.search.toLowerCase());
@@ -76,16 +75,13 @@ export const ClientDetailsPage: React.FC = () => {
     return result.sort((a, b) => new Date(b.dueDate).getTime() - new Date(a.dueDate).getTime());
   }, [tasks, viewMode, user, filters]);
 
-  // Split tasks for the "List" view
   const { activeTasks, completedTasks } = useMemo(() => {
       const active = filteredBaseTasks.filter(t => t.status !== 'Completed' && t.status !== 'Done');
       const completed = filteredBaseTasks.filter(t => t.status === 'Completed' || t.status === 'Done');
-      // Sort completed by newest update
       completed.sort((a, b) => new Date(b.lastUpdatedAt || b.createdAt).getTime() - new Date(a.lastUpdatedAt || a.createdAt).getTime());
       return { activeTasks: active, completedTasks: completed };
   }, [filteredBaseTasks]);
 
-  // Stats Calculation for Header
   const progressStats = useMemo(() => {
       const total = tasks.length;
       const completed = tasks.filter(t => t.status === 'Completed' || t.status === 'Done' || t.status === 'Posted').length;
@@ -107,13 +103,17 @@ export const ClientDetailsPage: React.FC = () => {
 
   const handleDelete = async () => {
       if (!deleteId) return;
-      const newTasks = tasks.filter(t => t.id !== deleteId);
-      setTasks(newTasks);
+      
+      const id = deleteId;
+      setTasks(tasks.filter(t => t.id !== id));
       setDeleteId(null);
-      await tasksApi.delete(deleteId);
-      const allTasks = await tasksApi.getAll();
-      const updatedAll = allTasks.filter(t => t.id !== deleteId);
-      localStorage.setItem('mock_tasks_data', JSON.stringify(updatedAll));
+      
+      try {
+        await tasksApi.delete(id);
+      } catch (e) {
+        // Revert? For now simple error logging
+        console.error("Delete failed", e);
+      }
   };
 
   const handleSave = async (data: Partial<Task>) => {
@@ -124,41 +124,30 @@ export const ClientDetailsPage: React.FC = () => {
       };
       const finalData = { ...data, ...auditData };
 
-      if (editingTask) {
-          const updated = { ...editingTask, ...finalData } as Task;
-          const newTasks = tasks.map(t => t.id === updated.id ? updated : t);
-          setTasks(newTasks);
-          await tasksApi.update(updated.id, finalData);
-          
-          const allTasks = await tasksApi.getAll();
-          const updatedAll = allTasks.map(t => t.id === updated.id ? updated : t);
-          localStorage.setItem('mock_tasks_data', JSON.stringify(updatedAll));
-      } else {
-          const newTask = await tasksApi.create(finalData as Task);
-          setTasks([newTask, ...tasks]);
-          
-          const allTasks = await tasksApi.getAll();
-          localStorage.setItem('mock_tasks_data', JSON.stringify([newTask, ...allTasks]));
+      try {
+          if (editingTask) {
+              const updated = { ...editingTask, ...finalData } as Task;
+              setTasks(tasks.map(t => t.id === updated.id ? updated : t));
+              await tasksApi.update(updated.id, finalData);
+          } else {
+              const newTask = await tasksApi.create(finalData as Task);
+              setTasks([newTask, ...tasks]);
+          }
+      } catch(e) {
+          console.error("Save failed", e);
       }
   };
 
   const handleStatusChange = async (task: Task, newStatus: TaskStatus) => {
       const updated = { ...task, status: newStatus };
       setTasks(prev => prev.map(t => t.id === task.id ? updated : t));
-      
-      const allTasks = await tasksApi.getAll();
-      const updatedAll = allTasks.map(t => t.id === task.id ? updated : t);
-      localStorage.setItem('mock_tasks_data', JSON.stringify(updatedAll));
+      await tasksApi.update(task.id, { status: newStatus });
   };
 
   const handleToggleVisibility = async (task: Task) => {
       const updated = { ...task, isVisibleOnMainBoard: !task.isVisibleOnMainBoard };
       setTasks(prev => prev.map(t => t.id === task.id ? updated : t));
-      
       await tasksApi.update(task.id, { isVisibleOnMainBoard: !task.isVisibleOnMainBoard });
-      const allTasks = await tasksApi.getAll();
-      const updatedAll = allTasks.map(t => t.id === task.id ? updated : t);
-      localStorage.setItem('mock_tasks_data', JSON.stringify(updatedAll));
   };
 
   if (isLoading) return <div className="flex h-screen items-center justify-center bg-[#F8FAFC]">Loading...</div>;
@@ -172,7 +161,6 @@ export const ClientDetailsPage: React.FC = () => {
         
         <main className="flex-1 p-8 overflow-y-auto custom-scrollbar h-[calc(100vh-80px)]">
            
-           {/* Breadcrumbs */}
            <div className="mb-6 flex items-center gap-2 text-sm text-gray-500 font-medium">
                 <Link to="/client-tracker" className="hover:text-brand-600 transition-colors flex items-center gap-1">
                     <ArrowLeft className="h-4 w-4" /> Clients
@@ -181,7 +169,6 @@ export const ClientDetailsPage: React.FC = () => {
                 <span className="text-gray-900">{client.company}</span>
            </div>
 
-           {/* Premium Header */}
            <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm mb-8 relative overflow-hidden">
                <div className="absolute top-0 right-0 p-8 opacity-5">
                    <LayoutList className="h-64 w-64 text-brand-600 -rotate-12 transform translate-x-12 -translate-y-12" />
@@ -224,9 +211,7 @@ export const ClientDetailsPage: React.FC = () => {
                        </div>
                    </div>
 
-                   {/* Right Side Stats */}
                    <div className="flex items-center gap-8 bg-gray-50/50 p-6 rounded-2xl border border-gray-100 backdrop-blur-sm">
-                       {/* Circular Progress */}
                        <div className="relative h-24 w-24 flex-shrink-0">
                            <svg className="h-full w-full -rotate-90 transform" viewBox="0 0 36 36">
                                <path className="text-gray-200" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" strokeWidth="3.5" />
@@ -252,13 +237,9 @@ export const ClientDetailsPage: React.FC = () => {
                </div>
            </div>
 
-           {/* Toolbar & Table Container */}
            <div className="bg-white rounded-3xl shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] border border-gray-100/50 flex flex-col flex-1 overflow-hidden min-h-[500px]">
                 
-                {/* Header Toolbar */}
                 <div className="flex flex-col lg:flex-row items-center justify-between gap-4 p-4 border-b border-gray-100">
-                    
-                    {/* Modern Tabs */}
                     <div className="bg-gray-100/80 p-1 rounded-xl flex items-center gap-1 w-full lg:w-auto overflow-x-auto">
                         {[
                             { id: 'list', label: 'List View', icon: LayoutList },
@@ -292,17 +273,13 @@ export const ClientDetailsPage: React.FC = () => {
                     </div>
                 </div>
 
-                {/* Filters */}
                 {viewMode !== 'calendar' && (
                     <TasksFilter filters={filters} setFilters={setFilters} />
                 )}
 
-                {/* Content Area */}
                 <div className="flex-1 overflow-y-auto bg-white p-0">
-                    {/* LIST or MINE view */}
                     {(viewMode === 'list' || viewMode === 'mine') && (
                         <div>
-                             {/* Active Section */}
                              <div className="p-4 bg-gray-50/50 border-b border-gray-100 flex items-center gap-2 sticky top-0 z-20">
                                 <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
                                 <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wide">Active Queue ({activeTasks.length})</h3>
@@ -314,10 +291,9 @@ export const ClientDetailsPage: React.FC = () => {
                                 onDelete={(id) => setDeleteId(id)} 
                                 onStatusChange={handleStatusChange}
                                 onToggleVisibility={handleToggleVisibility}
-                                readOnly={false} // Admins can edit
+                                readOnly={false}
                             />
 
-                            {/* Completed Section */}
                             {completedTasks.length > 0 && (
                                 <div className="border-t border-gray-100 mt-4">
                                      <button 
@@ -341,7 +317,7 @@ export const ClientDetailsPage: React.FC = () => {
                                                 onDelete={(id) => setDeleteId(id)} 
                                                 onStatusChange={handleStatusChange}
                                                 onToggleVisibility={handleToggleVisibility}
-                                                readOnly={false} // Admins can edit
+                                                readOnly={false}
                                             />
                                         </div>
                                     )}
@@ -350,19 +326,17 @@ export const ClientDetailsPage: React.FC = () => {
                         </div>
                     )}
 
-                    {/* KANBAN view */}
                     {viewMode === 'kanban' && (
                         <div className="h-full p-6 bg-gray-50/30">
                             <TasksKanban 
                                 tasks={filteredBaseTasks} 
                                 onEdit={handleEdit} 
                                 onStatusChange={handleStatusChange} 
-                                readOnly={false} // Admins can drag
+                                readOnly={false}
                             />
                         </div>
                     )}
 
-                    {/* CALENDAR view */}
                     {viewMode === 'calendar' && (
                         <div className="h-full p-6">
                             <TasksCalendar tasks={filteredBaseTasks} onEdit={handleEdit} />

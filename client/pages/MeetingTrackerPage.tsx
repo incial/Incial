@@ -29,7 +29,6 @@ export const MeetingTrackerPage: React.FC = () => {
     try {
       const data = await meetingsApi.getAll();
       setMeetings(data);
-      localStorage.setItem('mock_meetings_data', JSON.stringify(data));
     } catch (err) {
       console.error(err);
     } finally {
@@ -67,27 +66,31 @@ export const MeetingTrackerPage: React.FC = () => {
       
       const finalData = { ...data, ...auditData };
 
-      if (editingMeeting) {
-          const updated = { ...editingMeeting, ...finalData } as Meeting;
-          const newMeetings = meetings.map(m => m.id === updated.id ? updated : m);
-          setMeetings(newMeetings);
-          await meetingsApi.update(updated.id, finalData);
-          localStorage.setItem('mock_meetings_data', JSON.stringify(newMeetings));
-      } else {
-          const newMeeting = await meetingsApi.create(finalData as Meeting);
-          const newMeetings = [newMeeting, ...meetings];
-          setMeetings(newMeetings);
-          localStorage.setItem('mock_meetings_data', JSON.stringify(newMeetings));
+      try {
+          if (editingMeeting) {
+              const updated = { ...editingMeeting, ...finalData } as Meeting;
+              setMeetings(meetings.map(m => m.id === updated.id ? updated : m));
+              await meetingsApi.update(updated.id, finalData);
+          } else {
+              const newMeeting = await meetingsApi.create(finalData as Meeting);
+              setMeetings([newMeeting, ...meetings]);
+          }
+      } catch (e) {
+          fetchData();
       }
   };
 
   const handleDelete = async () => {
       if (!deleteId) return;
-      const newMeetings = meetings.filter(m => m.id !== deleteId);
-      setMeetings(newMeetings);
+      const id = deleteId;
+      setMeetings(meetings.filter(m => m.id !== id));
       setDeleteId(null);
-      await meetingsApi.delete(deleteId);
-      localStorage.setItem('mock_meetings_data', JSON.stringify(newMeetings));
+      
+      try {
+        await meetingsApi.delete(id);
+      } catch(e) {
+        fetchData();
+      }
   };
 
   return (

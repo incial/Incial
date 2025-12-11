@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo } from 'react';
 import { Navbar } from '../components/layout/Navbar';
 import { Sidebar } from '../components/layout/Sidebar';
@@ -7,14 +8,14 @@ import { ClientTaskTable } from '../components/client-tracker/ClientTaskTable';
 import { TasksKanban } from '../components/tasks/TasksKanban';
 import { TasksCalendar } from '../components/tasks/TasksCalendar';
 import { TasksFilter } from '../components/tasks/TasksFilter';
-import { CheckCircle, HardDrive, LayoutList, Calendar as CalendarIcon, User, ExternalLink, Kanban, Archive, ChevronDown, ChevronRight, AlertCircle, Clock } from 'lucide-react';
+import { CheckCircle, HardDrive, LayoutList, Calendar as CalendarIcon, User, ExternalLink, Kanban, Archive, ChevronDown, ChevronRight, AlertCircle, Clock, LogOut } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { Navigate } from 'react-router-dom';
 
 type ViewMode = 'list' | 'kanban' | 'calendar';
 
 export const ClientPortalPage: React.FC = () => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const [client, setClient] = useState<CRMEntry | null>(null);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -97,9 +98,21 @@ export const ClientPortalPage: React.FC = () => {
   
   if (!user?.companyId || !client) {
       return (
-        <div className="flex h-screen items-center justify-center bg-[#F8FAFC] flex-col gap-4">
-            <h2 className="text-xl font-bold text-gray-800">No Project Found</h2>
-            <p className="text-gray-500">Your account is not linked to an active project.</p>
+        <div className="flex h-screen items-center justify-center bg-[#F8FAFC] flex-col gap-4 p-4 text-center">
+            <div className="h-16 w-16 bg-gray-100 rounded-full flex items-center justify-center mb-2">
+                <AlertCircle className="h-8 w-8 text-gray-400" />
+            </div>
+            <div>
+                <h2 className="text-xl font-bold text-gray-900">No Project Found</h2>
+                <p className="text-gray-500 mt-1">Your account is not linked to an active project.</p>
+            </div>
+            <button 
+                onClick={logout}
+                className="mt-4 flex items-center gap-2 px-5 py-2.5 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 rounded-xl font-bold transition-all shadow-sm active:scale-95"
+            >
+                <LogOut className="h-4 w-4" />
+                Sign Out
+            </button>
         </div>
       );
   }

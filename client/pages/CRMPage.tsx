@@ -37,8 +37,6 @@ export const CRMPage: React.FC = () => {
     try {
       const response = await crmApi.getAll();
       setEntries(response.crmList);
-      // In a real app with localStorage persistence for demo:
-      localStorage.setItem('mock_crm_data', JSON.stringify(response.crmList));
     } catch (error) {
       console.error("Failed to fetch CRM data", error);
     } finally {
@@ -60,24 +58,19 @@ export const CRMPage: React.FC = () => {
 
       let matchesStatus = true;
       if (filters.status === 'ALL') {
-         // Show everything
          matchesStatus = true;
       } else if (filters.status === '') {
-         // Default "Active Pipeline" logic: exclude dropped, completed, onboarded
          matchesStatus = !['drop', 'completed', 'onboarded'].includes(item.status);
       } else {
-         // Specific status match
          matchesStatus = item.status === filters.status;
       }
 
       const matchesAssignee = filters.assignedTo === '' || item.assignedTo === filters.assignedTo;
-      
       const matchesDate = filters.dateRangeStart === '' || (item.nextFollowUp && item.nextFollowUp >= filters.dateRangeStart);
 
       return matchesSearch && matchesStatus && matchesAssignee && matchesDate;
     });
 
-    // Default Sort: ID Descending (Newest first)
     return result.sort((a, b) => b.id - a.id);
   }, [entries, filters]);
 
@@ -101,16 +94,14 @@ export const CRMPage: React.FC = () => {
       
       const id = deleteId;
       // Optimistic Update
-      const newEntries = entries.filter(e => e.id !== id);
-      setEntries(newEntries);
-      setDeleteId(null); // Close modal immediately
+      setEntries(entries.filter(e => e.id !== id));
+      setDeleteId(null);
       
       try {
         await crmApi.delete(id);
-        localStorage.setItem('mock_crm_data', JSON.stringify(newEntries));
       } catch (e) {
         alert("Failed to delete item");
-        fetchData(); // Revert
+        fetchData();
       }
   };
 
@@ -121,24 +112,21 @@ export const CRMPage: React.FC = () => {
       };
       const finalData = { ...data, ...auditData };
 
-      if (editingEntry) {
-          // Update
-          const updatedEntry = { ...editingEntry, ...finalData } as CRMEntry;
-          const newEntries = entries.map(e => e.id === updatedEntry.id ? updatedEntry : e);
-          
-          setEntries(newEntries);
-          await crmApi.update(updatedEntry.id, finalData);
-          localStorage.setItem('mock_crm_data', JSON.stringify(newEntries));
-      } else {
-          // Create
-          const newEntry = await crmApi.create(finalData as CRMEntry);
-          const newEntries = [newEntry, ...entries];
-          setEntries(newEntries);
-          localStorage.setItem('mock_crm_data', JSON.stringify(newEntries));
+      try {
+          if (editingEntry) {
+              const updatedEntry = { ...editingEntry, ...finalData } as CRMEntry;
+              setEntries(entries.map(e => e.id === updatedEntry.id ? updatedEntry : e)); // Optimistic
+              await crmApi.update(updatedEntry.id, finalData);
+          } else {
+              const newEntry = await crmApi.create(finalData as CRMEntry);
+              setEntries([newEntry, ...entries]);
+          }
+      } catch (e) {
+          console.error("Failed to save", e);
+          fetchData(); // Revert on error
       }
   };
 
-  // Helper to get name for delete modal
   const itemToDeleteName = useMemo(() => {
       if (!deleteId) return '';
       const item = entries.find(e => e.id === deleteId);

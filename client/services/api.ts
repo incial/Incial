@@ -1,189 +1,141 @@
 
 import axios from 'axios';
-import { CRMEntry, Task, Meeting, User, UserRole, AuthResponse } from '../types';
-import { MOCK_CRM_DATA, MOCK_TASKS_DATA, MOCK_MEETINGS_DATA } from './mockData';
+import { CRMEntry, Task, Meeting, AuthResponse } from '../types';
 
-// In a real app, this comes from env
-const API_URL = 'https://api.incial.com/api/v1'; 
+// ============================================================================
+// ⚙️ API CONFIGURATION
+// ============================================================================
+
+const API_URL = 'http://localhost:8080/api/v1'; 
 
 const api = axios.create({
   baseURL: API_URL,
 });
 
+// Attach JWT token to every request if available
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
   if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
 
-// Mock delay to simulate network
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-
-export const crmApi = {
-  // Mocking the get call for demonstration purposes since we don't have a real backend
-  getAll: async (): Promise<{crmList: CRMEntry[]}> => {
-    // REAL CALL: return api.get("/crm/all");
-    await delay(600);
-    const stored = localStorage.getItem('mock_crm_data');
-    if (stored) {
-        try {
-            const parsed = JSON.parse(stored);
-            // Sanitize legacy data: Ensure 'work' is string[], not object[]
-            const sanitized = parsed.map((entry: any) => ({
-                ...entry,
-                work: Array.isArray(entry.work) 
-                    ? entry.work.map((w: any) => (typeof w === 'object' && w !== null && 'name' in w) ? w.name : w) 
-                    : []
-            }));
-            // Update storage with sanitized data
-            localStorage.setItem('mock_crm_data', JSON.stringify(sanitized));
-            return { crmList: sanitized };
-        } catch (e) {
-            console.warn("Failed to parse local CRM data", e);
-            return { crmList: MOCK_CRM_DATA };
-        }
+// Helper to extract error message from backend response
+const handleApiError = (error: any) => {
+    if (error.response) {
+        // Backend returned an error response (4xx, 5xx)
+        console.error("API Error:", error.response.status, error.response.data);
+        const message = error.response.data?.message || error.response.data?.error || "Request failed";
+        throw new Error(message);
+    } else if (error.request) {
+        // Network error (Backend not reachable)
+        console.error("Network Error:", error.request);
+        throw new Error("Cannot connect to server. Please check if the backend is running.");
+    } else {
+        console.error("Request Setup Error:", error.message);
+        throw new Error(error.message);
     }
-    return { crmList: MOCK_CRM_DATA };
+};
+
+// ============================================================================
+// 🔌 API ENDPOINTS
+// ============================================================================
+
+// --- CRM API ---
+export const crmApi = {
+  getAll: async (): Promise<{crmList: CRMEntry[]}> => {
+    try {
+        const res = await api.get("/crm/all");
+        return res.data;
+    } catch (error) { throw handleApiError(error); }
   },
 
   create: async (data: Omit<CRMEntry, 'id'>): Promise<CRMEntry> => {
-    // REAL CALL: return api.post("/crm/create", data);
-    await delay(400);
-    const newEntry = { 
-        ...data, 
-        id: Date.now(),
-        // Generate a reference ID if it's a "Company" type status
-        referenceId: (data.status === 'onboarded' || data.status === 'on progress') 
-            ? `REF-${new Date().getFullYear()}-${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`
-            : undefined
-    };
-    return newEntry;
+    try {
+        const res = await api.post("/crm/create", data);
+        return res.data;
+    } catch (error) { throw handleApiError(error); }
   },
 
   update: async (id: number, data: Partial<CRMEntry>): Promise<CRMEntry> => {
-     // REAL CALL: return api.put(`/crm/update/${id}`, data);
-     await delay(300);
-     return { id, ...data } as CRMEntry;
+     try {
+        const res = await api.put(`/crm/update/${id}`, data);
+        return res.data;
+     } catch (error) { throw handleApiError(error); }
   },
 
   delete: async (id: number): Promise<void> => {
-    // REAL CALL: return api.delete(`/crm/delete/${id}`);
-    await delay(300);
+    try {
+        await api.delete(`/crm/delete/${id}`);
+    } catch (error) { throw handleApiError(error); }
   }
 };
 
+// --- TASKS API ---
 export const tasksApi = {
   getAll: async (): Promise<Task[]> => {
-    await delay(600);
-    const stored = localStorage.getItem('mock_tasks_data');
-    if (stored) return JSON.parse(stored);
-    return MOCK_TASKS_DATA;
+    try {
+        const res = await api.get("/tasks/all");
+        return res.data;
+    } catch (error) { throw handleApiError(error); }
   },
 
   create: async (data: Omit<Task, 'id' | 'createdAt'>): Promise<Task> => {
-    await delay(300);
-    const newEntry: Task = { 
-      ...data, 
-      id: Date.now(),
-      createdAt: new Date().toISOString()
-    };
-    return newEntry;
+    try {
+        const res = await api.post("/tasks/create", data);
+        return res.data;
+    } catch (error) { throw handleApiError(error); }
   },
 
   update: async (id: number, data: Partial<Task>): Promise<Task> => {
-     await delay(200);
-     return { id, ...data } as Task;
+     try {
+        const res = await api.put(`/tasks/update/${id}`, data);
+        return res.data;
+     } catch (error) { throw handleApiError(error); }
   },
 
   delete: async (id: number): Promise<void> => {
-    await delay(200);
+    try {
+        await api.delete(`/tasks/delete/${id}`);
+    } catch (error) { throw handleApiError(error); }
   }
 };
 
+// --- MEETINGS API ---
 export const meetingsApi = {
   getAll: async (): Promise<Meeting[]> => {
-    await delay(600);
-    const stored = localStorage.getItem('mock_meetings_data');
-    if (stored) return JSON.parse(stored);
-    return MOCK_MEETINGS_DATA;
+    try {
+        const res = await api.get("/meetings/all");
+        return res.data;
+    } catch (error) { throw handleApiError(error); }
   },
 
   create: async (data: Omit<Meeting, 'id' | 'createdAt'>): Promise<Meeting> => {
-    await delay(300);
-    const newEntry: Meeting = {
-      ...data,
-      id: Date.now(),
-      createdAt: new Date().toISOString()
-    };
-    return newEntry;
+    try {
+        const res = await api.post("/meetings/create", data);
+        return res.data;
+    } catch (error) { throw handleApiError(error); }
   },
 
   update: async (id: number, data: Partial<Meeting>): Promise<Meeting> => {
-    await delay(200);
-    return { id, ...data } as Meeting;
+    try {
+        const res = await api.put(`/meetings/update/${id}`, data);
+        return res.data;
+    } catch (error) { throw handleApiError(error); }
   },
 
   delete: async (id: number): Promise<void> => {
-    await delay(200);
+    try {
+        await api.delete(`/meetings/delete/${id}`);
+    } catch (error) { throw handleApiError(error); }
   }
 };
 
+// --- AUTH API ---
 export const authApi = {
   login: async (email: string, password: string): Promise<AuthResponse> => {
-    // REAL CALL: return api.post("/auth/login", { email, password });
-    await delay(800);
-    
-    // 1. SUPER ADMIN (Everything)
-    if (email === 'super@incial.com' && password === 'super') {
-      return {
-        statusCode: 200,
-        token: "mock-jwt-token-super",
-        role: "ROLE_SUPER_ADMIN",
-        user: { id: 1, name: "Super Admin", email, role: "ROLE_SUPER_ADMIN" as UserRole },
-        message: "Login successful"
-      };
-    }
-
-    // 2. ADMIN (Everything except Analytics)
-    if (email === 'admin@incial.com' && password === 'admin') {
-      return {
-        statusCode: 200,
-        token: "mock-jwt-token-admin",
-        role: "ROLE_ADMIN",
-        // FIX: Changed name from "Vallapata (Admin)" to "Vallapata" to match MOCK_TASKS_DATA
-        user: { id: 2, name: "Vallapata", email, role: "ROLE_ADMIN" as UserRole },
-        message: "Login successful"
-      };
-    }
-
-    // 3. EMPLOYEE (Tasks, Companies, Client Tracker, Meetings)
-    if (email === 'employee@incial.com' && password === 'employee') {
-      return {
-        statusCode: 200,
-        token: "mock-jwt-token-employee",
-        role: "ROLE_EMPLOYEE",
-        user: { id: 3, name: "John Doe", email, role: "ROLE_EMPLOYEE" as UserRole },
-        message: "Login successful"
-      };
-    }
-
-    // 4. CLIENT (Own Company Data Only) - Mapping to Company ID 1 (SMR Rubbers)
-    if (email === 'client@incial.com' && password === 'client') {
-      return {
-        statusCode: 200,
-        token: "mock-jwt-token-client",
-        role: "ROLE_CLIENT",
-        user: { 
-            id: 4, 
-            name: "Anil Michael", 
-            email, 
-            role: "ROLE_CLIENT" as UserRole,
-            companyId: 1 // Linked to SMR Rubbers in mock data
-        },
-        message: "Login successful"
-      };
-    }
-
-    throw new Error("Invalid credentials");
+    try {
+        const res = await api.post("/auth/login", { email, password });
+        return res.data;
+    } catch (error) { throw handleApiError(error); }
   }
 };

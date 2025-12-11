@@ -53,9 +53,6 @@ export const TasksPage: React.FC = () => {
           map[c.id] = c.company;
       });
       setCompanyMap(map);
-
-      // Mock Persistence
-      localStorage.setItem('mock_tasks_data', JSON.stringify(tasksData));
     } catch (err) {
       console.error(err);
     } finally {
@@ -72,7 +69,6 @@ export const TasksPage: React.FC = () => {
       // 1. Core Visibility Logic:
       // Show if it's an internal task (no companyId) OR if it's explicitly pinned to Main Board
       const isVisible = !t.companyId || t.isVisibleOnMainBoard;
-      
       if (!isVisible) return false;
 
       const matchesSearch = t.title.toLowerCase().includes(filters.search.toLowerCase());
@@ -121,12 +117,15 @@ export const TasksPage: React.FC = () => {
       if (!deleteId) return;
       const id = deleteId;
       
-      const newTasks = tasks.filter(t => t.id !== id);
-      setTasks(newTasks);
+      // Optimistic
+      setTasks(tasks.filter(t => t.id !== id));
       setDeleteId(null);
       
-      await tasksApi.delete(id);
-      localStorage.setItem('mock_tasks_data', JSON.stringify(newTasks));
+      try {
+        await tasksApi.delete(id);
+      } catch (e) {
+        fetchData();
+      }
   };
 
   const handleSave = async (data: Partial<Task>) => {
@@ -136,17 +135,17 @@ export const TasksPage: React.FC = () => {
       };
       const finalData = { ...data, ...auditData };
 
-      if (editingTask) {
-          const updated = { ...editingTask, ...finalData } as Task;
-          const newTasks = tasks.map(t => t.id === updated.id ? updated : t);
-          setTasks(newTasks);
-          await tasksApi.update(updated.id, finalData);
-          localStorage.setItem('mock_tasks_data', JSON.stringify(newTasks));
-      } else {
-          const newTask = await tasksApi.create(finalData as Task);
-          const newTasks = [newTask, ...tasks];
-          setTasks(newTasks);
-          localStorage.setItem('mock_tasks_data', JSON.stringify(newTasks));
+      try {
+          if (editingTask) {
+              const updated = { ...editingTask, ...finalData } as Task;
+              setTasks(tasks.map(t => t.id === updated.id ? updated : t));
+              await tasksApi.update(updated.id, finalData);
+          } else {
+              const newTask = await tasksApi.create(finalData as Task);
+              setTasks([newTask, ...tasks]);
+          }
+      } catch(e) {
+          fetchData();
       }
   };
 
@@ -163,7 +162,6 @@ export const TasksPage: React.FC = () => {
           lastUpdatedBy: user?.name || 'Unknown',
           lastUpdatedAt: new Date().toISOString()
       });
-      localStorage.setItem('mock_tasks_data', JSON.stringify(tasks.map(t => t.id === task.id ? updated : t)));
   };
 
   const handlePriorityChange = async (task: Task, newPriority: TaskPriority) => {
@@ -179,10 +177,8 @@ export const TasksPage: React.FC = () => {
           lastUpdatedBy: user?.name || 'Unknown',
           lastUpdatedAt: new Date().toISOString()
       });
-      localStorage.setItem('mock_tasks_data', JSON.stringify(tasks.map(t => t.id === task.id ? updated : t)));
   };
 
-  // Helper to get name for delete modal
   const itemToDeleteName = useMemo(() => {
       if (!deleteId) return '';
       const item = tasks.find(t => t.id === deleteId);
@@ -216,7 +212,6 @@ export const TasksPage: React.FC = () => {
 
           <div className="bg-white rounded-3xl shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] border border-gray-100/50 flex flex-col flex-1 overflow-hidden">
             
-            {/* View Tabs */}
             <div className="flex items-center gap-1 p-2 border-b border-gray-100 overflow-x-auto">
                 {[
                     { id: 'list', label: 'All Tasks', icon: LayoutList },
@@ -239,12 +234,10 @@ export const TasksPage: React.FC = () => {
                 ))}
             </div>
 
-            {/* Filters */}
             {viewMode !== 'calendar' && (
                 <TasksFilter filters={filters} setFilters={setFilters} />
             )}
 
-            {/* Content Area */}
             <div className="flex-1 overflow-y-auto overflow-x-hidden bg-white p-0">
                 {isLoading ? (
                     <div className="flex items-center justify-center h-full">
@@ -254,7 +247,6 @@ export const TasksPage: React.FC = () => {
                     <>
                         {(viewMode === 'list' || viewMode === 'mine') && (
                             <div>
-                                {/* Active Tasks Section */}
                                 <TasksTable 
                                     data={activeTasks} 
                                     companyMap={companyMap}
@@ -264,7 +256,6 @@ export const TasksPage: React.FC = () => {
                                     onPriorityChange={handlePriorityChange}
                                 />
                                 
-                                {/* Completed Tasks Section */}
                                 {completedTasks.length > 0 && (
                                     <div className="border-t border-gray-100">
                                         <button 

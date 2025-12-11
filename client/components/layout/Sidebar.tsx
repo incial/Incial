@@ -61,7 +61,7 @@ export const Sidebar: React.FC = () => {
                 {/* Operational - Everyone except Client (Client has Portal) */}
                 {isEmployee && (
                     <>
-                        <NavItem icon={CalendarDays} label="Universal Calendar" to="/calendar" active={currentPath === '/calendar'} />
+                        <NavItem icon={CalendarDays} label="Calendar" to="/calendar" active={currentPath === '/calendar'} />
                         <NavItem icon={CheckSquare} label="Tasks" to="/tasks" active={currentPath.startsWith('/tasks')} />
                         <NavItem icon={Calendar} label="Meeting Tracker" to="/meetings" active={currentPath.startsWith('/meetings')} />
                         <NavItem icon={Briefcase} label="Companies" to="/companies" active={currentPath.startsWith('/companies')} />
