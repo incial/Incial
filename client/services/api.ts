@@ -143,17 +143,41 @@ export const companiesApi = {
             ...item,
             company: item.name || item.company // Handle backend sending 'name' instead of 'company'
         }));
-    } catch (error) { throw handleApiError(error); }
+    } catch (error: any) { 
+        // Fallback Strategy: If companies endpoint is broken (500) or missing (404),
+        // try to fetch via CRM endpoint if user has permissions.
+        console.warn("Primary companies endpoint failed, attempting fallback to CRM...", error.message);
+        try {
+            const res = await api.get("/crm/all");
+            const data = res.data.crmList || [];
+            return data.map((item: any) => ({
+                ...item,
+                company: item.name || item.company
+            }));
+        } catch (fallbackError) {
+            // If fallback also fails, throw original error
+            throw handleApiError(error); 
+        }
+    }
   },
   
   // Note: Create/Update/Delete typically handled via CRM endpoints for consistency, 
   // but if needed for employees they can be added here mirroring backend routes.
   update: async (id: number, data: Partial<CRMEntry>): Promise<CRMEntry> => {
+     const payload = cleanPayload(data);
      try {
-        const payload = cleanPayload(data);
         const res = await api.put(`/companies/update/${id}`, payload);
         return { ...res.data, company: res.data.name || res.data.company };
-     } catch (error) { throw handleApiError(error); }
+     } catch (error: any) { 
+         // Fallback to CRM update if companies update fails
+         console.warn("Primary companies update failed, attempting fallback to CRM...", error.message);
+         try {
+            const res = await api.put(`/crm/update/${id}`, payload);
+            return { ...res.data, company: res.data.name || res.data.company };
+         } catch (fallbackError) {
+            throw handleApiError(error);
+         }
+     }
   }
 };
 
