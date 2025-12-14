@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Save, Calendar, Clock, Link as LinkIcon, AlignLeft, Video, Maximize2, Minimize2, Trash2, History } from 'lucide-react';
 import { Meeting, MeetingStatus } from '../../types';
 import { CustomSelect } from '../ui/CustomSelect';
+import { formatDateTime } from '../../utils';
 
 interface MeetingFormProps {
   isOpen: boolean;
@@ -198,7 +199,7 @@ export const MeetingForm: React.FC<MeetingFormProps> = ({ isOpen, onClose, onSub
                           <History className="h-3 w-3" />
                           <span>
                               Last updated by <span className="font-semibold text-gray-600">{getDisplayName(initialData.lastUpdatedBy)}</span>
-                              {initialData.lastUpdatedAt && ` on ${initialData.lastUpdatedAt}`}
+                              {initialData.lastUpdatedAt && ` on ${formatDateTime(initialData.lastUpdatedAt)}`}
                           </span>
                       </div>
                   )}
