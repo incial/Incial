@@ -146,8 +146,8 @@ export const CRMForm: React.FC<CRMFormProps> = ({ isOpen, onClose, onSubmit, ini
         <div className="bg-gray-50 rounded-xl p-5 border border-gray-200">
             <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
                 <div>
-                    <div className="flex items-center gap-3">
-                        <h2 className="text-2xl font-bold text-gray-900">{formData.company}</h2>
+                    <div className="flex flex-wrap items-center gap-3">
+                        <h2 className="text-2xl font-bold text-gray-900 break-words">{formData.company}</h2>
                         {formData.referenceId && (
                             <span className="px-2 py-0.5 rounded-md bg-gray-200 text-gray-600 text-xs font-mono font-bold border border-gray-300">
                                 {formData.referenceId}
@@ -175,19 +175,19 @@ export const CRMForm: React.FC<CRMFormProps> = ({ isOpen, onClose, onSubmit, ini
                         <div className="h-6 w-6 rounded-full bg-brand-100 flex items-center justify-center text-xs font-bold text-brand-700">
                             {formData.assignedTo?.[0] || '?'}
                         </div>
-                        <span className="font-medium text-gray-900">{formData.assignedTo || 'Unassigned'}</span>
+                        <span className="font-medium text-gray-900 text-sm">{formData.assignedTo || 'Unassigned'}</span>
                     </div>
                 </div>
                 <div>
                     <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Next Follow Up</p>
-                    <div className={`flex items-center gap-1.5 font-semibold ${getFollowUpColor(formData.nextFollowUp || '')}`}>
+                    <div className={`flex items-center gap-1.5 font-semibold text-sm ${getFollowUpColor(formData.nextFollowUp || '')}`}>
                         <Calendar className="h-4 w-4" />
                         {formatDate(formData.nextFollowUp || '')}
                     </div>
                 </div>
                 <div>
                     <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Last Contact</p>
-                    <p className="text-gray-700 font-medium">{formatDate(formData.lastContact || '')}</p>
+                    <p className="text-gray-700 font-medium text-sm">{formatDate(formData.lastContact || '')}</p>
                 </div>
             </div>
         </div>
@@ -200,16 +200,16 @@ export const CRMForm: React.FC<CRMFormProps> = ({ isOpen, onClose, onSubmit, ini
                     </h3>
                     <div className="space-y-3">
                         <div className="flex items-center gap-3 text-sm">
-                            <Phone className="h-4 w-4 text-gray-400" />
-                            <span className="text-gray-700">{formData.phone || 'No phone'}</span>
+                            <Phone className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                            <span className="text-gray-700 truncate">{formData.phone || 'No phone'}</span>
                         </div>
                         <div className="flex items-center gap-3 text-sm">
-                            <Mail className="h-4 w-4 text-gray-400" />
-                            <span className="text-gray-700">{formData.email || 'No email'}</span>
+                            <Mail className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                            <span className="text-gray-700 truncate">{formData.email || 'No email'}</span>
                         </div>
                         <div className="flex items-center gap-3 text-sm">
-                            <MapPin className="h-4 w-4 text-gray-400" />
-                            <span className="text-gray-700">{formData.address || 'No address'}</span>
+                            <MapPin className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                            <span className="text-gray-700 truncate">{formData.address || 'No address'}</span>
                         </div>
                     </div>
                 </div>
@@ -327,11 +327,11 @@ export const CRMForm: React.FC<CRMFormProps> = ({ isOpen, onClose, onSubmit, ini
         </div>
 
         {/* Pipeline Info */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 bg-gray-50 p-4 rounded-xl border border-gray-200">
-            <div className="col-span-2 md:col-span-1">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 bg-gray-50 p-4 rounded-xl border border-gray-200">
+            <div className="col-span-1">
                 <CustomSelect label="Status" value={formData.status || 'lead'} onChange={(val) => setFormData({...formData, status: val as CRMStatus})} options={STATUS_OPTIONS} />
             </div>
-            <div className="col-span-2 md:col-span-1">
+            <div className="col-span-1">
                 <UserSelect 
                     label="Assigned To" 
                     value={formData.assignedTo || ''} 
@@ -340,7 +340,7 @@ export const CRMForm: React.FC<CRMFormProps> = ({ isOpen, onClose, onSubmit, ini
                     placeholder="Unassigned"
                 />
             </div>
-            <div className="col-span-2 md:col-span-1">
+            <div className="col-span-1">
                 <label className="block text-xs font-bold text-gray-500 uppercase mb-1.5">Deal Value (₹)</label>
                 <div className="relative">
                     <DollarSign className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
@@ -348,7 +348,7 @@ export const CRMForm: React.FC<CRMFormProps> = ({ isOpen, onClose, onSubmit, ini
                         value={formData.dealValue || ''} onChange={e => setFormData({...formData, dealValue: parseFloat(e.target.value) || 0})} />
                 </div>
             </div>
-            <div className="col-span-2 md:col-span-1">
+            <div className="col-span-1">
                 <CustomDatePicker label="Next Follow Up" value={formData.nextFollowUp || ''} onChange={(date) => setFormData({...formData, nextFollowUp: date})} />
             </div>
         </div>
@@ -438,7 +438,7 @@ export const CRMForm: React.FC<CRMFormProps> = ({ isOpen, onClose, onSubmit, ini
         )}
 
         {/* Action Buttons */}
-        <div className="flex justify-end gap-3 pt-6 border-t border-gray-100">
+        <div className="flex flex-wrap justify-end gap-3 pt-6 border-t border-gray-100">
             <button type="button" onClick={() => initialData ? setMode('view') : onClose()} className="px-5 py-2.5 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors font-medium">Cancel</button>
             <button type="submit" className="px-5 py-2.5 text-white bg-brand-600 hover:bg-brand-700 rounded-lg transition-colors font-medium flex items-center gap-2 shadow-lg shadow-brand-500/30"><Save className="h-4 w-4" /> Save Changes</button>
         </div>
@@ -466,15 +466,15 @@ export const CRMForm: React.FC<CRMFormProps> = ({ isOpen, onClose, onSubmit, ini
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 transition-all" onClick={onClose}>
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col" onClick={(e) => e.stopPropagation()}>
                 <div className="flex items-center justify-between p-5 border-b border-gray-100">
-                    <h2 className="text-xl font-bold text-gray-800">{mode === 'view' ? 'Deal Details' : (initialData ? 'Edit Deal' : 'New Deal')}</h2>
-                    <div className="flex items-center gap-2">
+                    <h2 className="text-xl font-bold text-gray-800 truncate pr-4">{mode === 'view' ? 'Deal Details' : (initialData ? 'Edit Deal' : 'New Deal')}</h2>
+                    <div className="flex items-center gap-2 flex-shrink-0">
                         {mode === 'view' && (
                             <button onClick={() => setMode('edit')} className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg flex items-center gap-2 text-sm font-semibold transition-colors"><Edit2 className="h-4 w-4" /> Edit</button>
                         )}
                         <button onClick={onClose} className="p-2 text-gray-400 hover:bg-gray-100 rounded-full transition-colors"><X className="h-5 w-5" /></button>
                     </div>
                 </div>
-                <div className="overflow-y-auto p-6 flex-1 custom-scrollbar">
+                <div className="overflow-y-auto p-4 md:p-6 flex-1 custom-scrollbar">
                     {mode === 'view' ? renderView() : renderEdit()}
                 </div>
             </div>

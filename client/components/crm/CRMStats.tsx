@@ -26,7 +26,7 @@ export const CRMStats: React.FC<{ entries: CRMEntry[] }> = ({ entries }) => {
 
     return (
         <div className="bg-white rounded-3xl border border-gray-100/80 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.03)] mb-8 overflow-hidden">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-gray-100">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 divide-y sm:divide-y-0 divide-x-0 sm:divide-x divide-gray-100">
                 
                 <div className="p-6 flex items-center gap-5 hover:bg-gray-50/50 transition-colors group">
                     <div className="h-12 w-12 rounded-2xl bg-indigo-50 flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-sm">

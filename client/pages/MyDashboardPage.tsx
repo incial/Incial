@@ -128,31 +128,31 @@ export const MyDashboardPage: React.FC = () => {
             <div className="flex-1 flex flex-col min-w-0">
                 <Navbar />
                 
-                <main className="flex-1 p-6 lg:p-10 overflow-y-auto custom-scrollbar h-[calc(100vh-80px)]">
+                <main className="flex-1 p-4 md:p-6 lg:p-10 overflow-y-auto custom-scrollbar h-[calc(100vh-64px)] md:h-[calc(100vh-80px)]">
                     
                     {/* Header: Clean & Text Focused */}
-                    <div className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-4">
+                    <div className="mb-8 md:mb-10 flex flex-col md:flex-row md:items-end justify-between gap-4">
                         <div>
                             <div className="flex items-center gap-2 mb-2">
                                 <span className="h-px w-8 bg-brand-300"></span>
                                 <span className="text-xs font-bold text-brand-600 uppercase tracking-widest">{currentDateDisplay}</span>
                             </div>
-                            <h1 className="text-3xl lg:text-4xl font-extrabold text-gray-900 tracking-tight">
+                            <h1 className="text-2xl md:text-3xl lg:text-4xl font-extrabold text-gray-900 tracking-tight">
                                 {greeting}, <span className="text-gray-400">{user?.name?.split(' ')[0]}</span>
                             </h1>
                         </div>
-                        <Link to="/tasks" className="hidden md:flex items-center gap-2 text-sm font-semibold text-gray-500 hover:text-brand-600 transition-colors group">
+                        <Link to="/tasks" className="flex items-center gap-2 text-sm font-semibold text-gray-500 hover:text-brand-600 transition-colors group">
                             Go to Board <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
                         </Link>
                     </div>
 
-                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
                         
                         {/* LEFT COLUMN: PRIMARY WORKFLOW (8/12) */}
-                        <div className="lg:col-span-8 space-y-8">
+                        <div className="lg:col-span-8 space-y-6 lg:space-y-8">
                             
                             {/* 1. HERO FOCUS CARD */}
-                            <div className="bg-white rounded-[2rem] p-8 border border-gray-100 shadow-sm relative overflow-hidden group">
+                            <div className="bg-white rounded-3xl md:rounded-[2rem] p-6 md:p-8 border border-gray-100 shadow-sm relative overflow-hidden group">
                                 {/* Ambient Background */}
                                 <div className="absolute top-0 right-0 w-64 h-64 bg-brand-50 rounded-full blur-3xl -mr-16 -mt-16 opacity-50 group-hover:opacity-100 transition-opacity"></div>
                                 
@@ -172,16 +172,16 @@ export const MyDashboardPage: React.FC = () => {
                                             <div className="h-16 w-16 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center flex-shrink-0">
                                                 <Video className="h-8 w-8" />
                                             </div>
-                                            <div className="flex-1">
-                                                <h3 className="text-2xl font-bold text-gray-900 leading-tight mb-2">{nextMeeting.title}</h3>
-                                                <div className="flex items-center gap-4 text-sm text-gray-500">
+                                            <div className="flex-1 min-w-0">
+                                                <h3 className="text-xl md:text-2xl font-bold text-gray-900 leading-tight mb-2 truncate">{nextMeeting.title}</h3>
+                                                <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-gray-500">
                                                     <span className="flex items-center gap-1.5"><Clock className="h-4 w-4" /> {new Date(nextMeeting.dateTime).toLocaleTimeString('en-IN', {hour: '2-digit', minute:'2-digit', timeZone: 'Asia/Kolkata'})}</span>
-                                                    <span>•</span>
+                                                    <span className="hidden sm:inline">•</span>
                                                     <span>Via {nextMeeting.meetingLink ? 'Video Call' : 'Scheduled Location'}</span>
                                                 </div>
                                             </div>
                                             {nextMeeting.meetingLink && (
-                                                <a href={nextMeeting.meetingLink} target="_blank" rel="noreferrer" className="mt-4 md:mt-0 px-6 py-3 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl shadow-lg shadow-brand-500/30 transition-all active:scale-95 flex items-center gap-2">
+                                                <a href={nextMeeting.meetingLink} target="_blank" rel="noreferrer" className="w-full md:w-auto mt-4 md:mt-0 px-6 py-3 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl shadow-lg shadow-brand-500/30 transition-all active:scale-95 flex items-center justify-center gap-2">
                                                     Join Now <ArrowRight className="h-4 w-4" />
                                                 </a>
                                             )}
@@ -191,14 +191,14 @@ export const MyDashboardPage: React.FC = () => {
                                             <div className="h-16 w-16 rounded-2xl bg-red-50 text-red-600 flex items-center justify-center flex-shrink-0">
                                                 <Zap className="h-8 w-8" />
                                             </div>
-                                            <div className="flex-1">
+                                            <div className="flex-1 min-w-0">
                                                 <div className="flex items-center gap-2 mb-2">
                                                     <span className="text-xs font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded border border-red-100">HIGH PRIORITY</span>
                                                     <span className="text-xs text-gray-400 font-medium">Due {formatDate(priorityTasks[0].dueDate)}</span>
                                                 </div>
-                                                <h3 className="text-2xl font-bold text-gray-900 leading-tight">{priorityTasks[0].title}</h3>
+                                                <h3 className="text-xl md:text-2xl font-bold text-gray-900 leading-tight truncate">{priorityTasks[0].title}</h3>
                                             </div>
-                                            <Link to="/tasks" className="mt-4 md:mt-0 px-6 py-3 bg-white border border-gray-200 text-gray-700 hover:border-brand-300 hover:text-brand-600 font-bold rounded-xl transition-all flex items-center gap-2">
+                                            <Link to="/tasks" className="w-full md:w-auto mt-4 md:mt-0 px-6 py-3 bg-white border border-gray-200 text-gray-700 hover:border-brand-300 hover:text-brand-600 font-bold rounded-xl transition-all flex items-center justify-center gap-2">
                                                 View Details <ArrowRight className="h-4 w-4" />
                                             </Link>
                                         </div>
@@ -226,14 +226,14 @@ export const MyDashboardPage: React.FC = () => {
                                     </Link>
                                 </div>
 
-                                <div className="bg-white rounded-[2rem] border border-gray-100 shadow-sm overflow-hidden min-h-[300px]">
+                                <div className="bg-white rounded-3xl md:rounded-[2rem] border border-gray-100 shadow-sm overflow-hidden min-h-[300px]">
                                     {priorityTasks.length > 0 ? (
                                         <div className="divide-y divide-gray-50">
                                             {priorityTasks.map((task) => (
-                                                <div key={task.id} className="group p-5 flex items-center gap-4 hover:bg-gray-50/80 transition-colors cursor-pointer">
+                                                <div key={task.id} className="group p-4 md:p-5 flex items-center gap-4 hover:bg-gray-50/80 transition-colors cursor-pointer">
                                                     
                                                     {/* Custom Checkbox visual */}
-                                                    <div className={`h-6 w-6 rounded-full border-2 flex items-center justify-center transition-colors ${
+                                                    <div className={`h-6 w-6 rounded-full border-2 flex items-center justify-center transition-colors flex-shrink-0 ${
                                                         task.status === 'Completed' ? 'bg-green-500 border-green-500' : 'border-gray-300 group-hover:border-brand-400'
                                                     }`}>
                                                         {task.status === 'Completed' && <CheckCircle2 className="h-4 w-4 text-white" />}
@@ -241,7 +241,7 @@ export const MyDashboardPage: React.FC = () => {
 
                                                     <div className="flex-1 min-w-0">
                                                         <h4 className="text-sm font-bold text-gray-900 truncate group-hover:text-brand-600 transition-colors">{task.title}</h4>
-                                                        <div className="flex items-center gap-3 mt-1 text-xs text-gray-500">
+                                                        <div className="flex flex-wrap items-center gap-3 mt-1 text-xs text-gray-500">
                                                             <span className={`flex items-center gap-1 ${task.dueDate === todayStr ? 'text-red-500 font-semibold' : ''}`}>
                                                                 <Calendar className="h-3 w-3" />
                                                                 {task.dueDate === todayStr ? 'Today' : formatDate(task.dueDate)}
@@ -249,11 +249,11 @@ export const MyDashboardPage: React.FC = () => {
                                                             {task.priority === 'High' && (
                                                                 <span className="text-red-600 font-semibold bg-red-50 px-1.5 rounded">High</span>
                                                             )}
-                                                            <span className="bg-gray-100 px-1.5 rounded">{task.status}</span>
+                                                            <span className="bg-gray-100 px-1.5 rounded hidden sm:inline-block">{task.status}</span>
                                                         </div>
                                                     </div>
 
-                                                    <ChevronRight className="h-4 w-4 text-gray-300 group-hover:text-brand-400 transition-colors" />
+                                                    <ChevronRight className="h-4 w-4 text-gray-300 group-hover:text-brand-400 transition-colors flex-shrink-0" />
                                                 </div>
                                             ))}
                                             <Link to="/tasks" className="block p-4 text-center text-xs font-bold text-gray-400 hover:text-brand-600 hover:bg-gray-50 transition-colors uppercase tracking-widest">
@@ -273,10 +273,10 @@ export const MyDashboardPage: React.FC = () => {
                         </div>
 
                         {/* RIGHT COLUMN: CONTEXT & SCHEDULE (4/12) */}
-                        <div className="lg:col-span-4 space-y-8">
+                        <div className="lg:col-span-4 space-y-6 lg:space-y-8">
                             
                             {/* 1. DAILY BRIEF (Calendar Widget) */}
-                            <div className="bg-white rounded-[2rem] border border-gray-100 shadow-sm p-6">
+                            <div className="bg-white rounded-3xl md:rounded-[2rem] border border-gray-100 shadow-sm p-6">
                                 <div className="flex items-center justify-between mb-6">
                                     <h3 className="font-bold text-gray-900 flex items-center gap-2">
                                         <CalendarDays className="h-5 w-5 text-gray-400" />
@@ -331,7 +331,7 @@ export const MyDashboardPage: React.FC = () => {
                             </div>
 
                             {/* 2. PRODUCTIVITY STATS */}
-                            <div className="bg-brand-900 rounded-[2rem] p-6 text-white relative overflow-hidden shadow-xl">
+                            <div className="bg-brand-900 rounded-3xl md:rounded-[2rem] p-6 text-white relative overflow-hidden shadow-xl">
                                 <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
                                 <div className="absolute bottom-0 left-0 w-32 h-32 bg-brand-500/20 rounded-full blur-2xl"></div>
                                 
