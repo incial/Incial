@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Save, Calendar, User, AlignLeft, Tag, Layers, Flag, Link as LinkIcon, Edit2, ExternalLink, Clock, CheckCircle, History, Maximize2, Minimize2, Layout } from 'lucide-react';
 import { Task, TaskPriority, TaskStatus, TaskType } from '../../types';
-import { formatDate } from '../../utils';
+import { formatDate, formatDateTime } from '../../utils';
 import { CustomSelect } from '../ui/CustomSelect';
 import { usersApi } from '../../services/api';
 
@@ -182,9 +182,8 @@ export const ClientTaskForm: React.FC<ClientTaskFormProps> = ({ isOpen, onClose,
                     {formData.lastUpdatedBy && (
                         <p className="flex items-center gap-1">
                             <History className="h-3 w-3" /> 
-                            Updated by <span className="font-semibold">{formData.lastUpdatedBy}</span> 
-                            <span className="mx-1">•</span> 
-                            {new Date(formData.lastUpdatedAt || '').toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata' })}
+                            Last updated by <span className="font-semibold">{formData.lastUpdatedBy}</span> 
+                            on {formatDateTime(formData.lastUpdatedAt || '')}
                         </p>
                     )}
                </div>

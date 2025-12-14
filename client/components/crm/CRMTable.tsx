@@ -2,7 +2,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { CRMEntry, CRMStatus } from '../../types';
 import { getStatusStyles, formatDate, getFollowUpColor } from '../../utils';
-import { Phone, Mail, Eye, Trash2, MoreHorizontal, ChevronDown, Check } from 'lucide-react';
+import { Phone, Mail, Eye, Trash2, MoreHorizontal, ChevronDown, Check, User, Calendar } from 'lucide-react';
 
 interface CRMTableProps {
   data: CRMEntry[];
@@ -21,19 +21,19 @@ const AvatarPlaceholder = ({ name }: { name?: string }) => {
         .join('')
         .toUpperCase();
     
-    // Generate a consistent pastel color based on name length
-    const colors = [
-        'bg-blue-100 text-blue-700',
-        'bg-indigo-100 text-indigo-700',
-        'bg-emerald-100 text-emerald-700',
-        'bg-amber-100 text-amber-700',
-        'bg-rose-100 text-rose-700',
-        'bg-violet-100 text-violet-700'
+    // Gradient backgrounds for a premium feel
+    const gradients = [
+        'from-blue-100 to-blue-50 text-blue-600',
+        'from-indigo-100 to-indigo-50 text-indigo-600',
+        'from-emerald-100 to-emerald-50 text-emerald-600',
+        'from-amber-100 to-amber-50 text-amber-600',
+        'from-rose-100 to-rose-50 text-rose-600',
+        'from-violet-100 to-violet-50 text-violet-600'
     ];
-    const colorClass = colors[safeName.length % colors.length];
+    const colorClass = gradients[safeName.length % gradients.length];
 
     return (
-        <div className={`h-9 w-9 rounded-full ${colorClass} flex items-center justify-center text-xs font-bold ring-2 ring-white shadow-sm`}>
+        <div className={`h-10 w-10 rounded-xl bg-gradient-to-br ${colorClass} flex items-center justify-center text-xs font-bold shadow-sm border border-white/50`}>
             {initials}
         </div>
     );
@@ -69,22 +69,22 @@ const StatusDropdown = ({ entry, onStatusChange }: { entry: CRMEntry; onStatusCh
         <div className="relative inline-block" ref={ref}>
             <button 
                 onClick={(e) => { e.stopPropagation(); setIsOpen(!isOpen); }}
-                className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold border shadow-sm transition-all hover:opacity-90 active:scale-95 capitalize whitespace-nowrap ${getStatusStyles(entry.status)}`}
+                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-bold border shadow-sm transition-all hover:opacity-90 active:scale-95 capitalize whitespace-nowrap ${getStatusStyles(entry.status)}`}
             >
                 {formatStatus(entry.status)}
-                <ChevronDown className={`h-3 w-3 opacity-50 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+                <ChevronDown className={`h-3 w-3 opacity-50 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
             </button>
             
             {isOpen && (
-                <div className="absolute top-full left-0 z-50 mt-2 w-40 bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden animate-in fade-in slide-in-from-top-1 duration-200">
-                    <div className="p-1">
+                <div className="absolute top-full left-0 z-50 mt-2 w-40 bg-white rounded-xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.1)] border border-gray-100 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+                    <div className="p-1.5">
                         {options.map(opt => (
                             <button
                                 key={opt}
                                 onClick={(e) => { e.stopPropagation(); onStatusChange(entry, opt); setIsOpen(false); }}
-                                className={`w-full flex items-center justify-between px-3 py-2 text-xs font-medium rounded-lg text-left transition-colors capitalize ${
+                                className={`w-full flex items-center justify-between px-3 py-2 text-xs font-bold rounded-lg text-left transition-colors capitalize ${
                                     entry.status === opt 
-                                    ? 'bg-brand-50 text-brand-700 font-bold' 
+                                    ? 'bg-brand-50 text-brand-700' 
                                     : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                                 }`}
                             >
@@ -102,9 +102,9 @@ const StatusDropdown = ({ entry, onStatusChange }: { entry: CRMEntry; onStatusCh
 export const CRMTable: React.FC<CRMTableProps> = ({ data, isLoading, onView, onDelete, onStatusChange }) => {
   if (isLoading) {
     return (
-      <div className="p-20 text-center">
-        <div className="animate-spin rounded-full h-10 w-10 border-[3px] border-gray-100 border-t-brand-600 mx-auto"></div>
-        <p className="mt-4 text-gray-400 font-medium animate-pulse">Loading Pipeline...</p>
+      <div className="p-32 text-center flex flex-col items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-[3px] border-gray-100 border-t-brand-600 mb-4"></div>
+        <p className="text-gray-400 text-xs font-bold uppercase tracking-widest animate-pulse">Loading Pipeline...</p>
       </div>
     );
   }
@@ -112,11 +112,11 @@ export const CRMTable: React.FC<CRMTableProps> = ({ data, isLoading, onView, onD
   if (data.length === 0) {
     return (
       <div className="p-20 text-center bg-white">
-        <div className="h-16 w-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
-            <MoreHorizontal className="h-8 w-8 text-gray-300" />
+        <div className="h-16 w-16 bg-gray-50 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-gray-100">
+            <User className="h-8 w-8 text-gray-300" />
         </div>
         <h3 className="text-gray-900 font-bold text-lg">No records found</h3>
-        <p className="text-gray-500 mt-1">Try adjusting your filters or create a new deal.</p>
+        <p className="text-gray-500 mt-1 text-sm">Try adjusting your filters or create a new deal.</p>
       </div>
     );
   }
@@ -125,31 +125,33 @@ export const CRMTable: React.FC<CRMTableProps> = ({ data, isLoading, onView, onD
     <div className="overflow-x-auto custom-scrollbar bg-white min-h-[500px] pb-32">
       <table className="w-full text-left border-collapse whitespace-nowrap">
         <thead>
-          <tr className="bg-gray-50/50 border-b border-gray-100">
-            <th className="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-wider sticky left-0 bg-gray-50/95 backdrop-blur-sm z-10">Contact / Company</th>
-            <th className="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-wider">Lead Source</th>
-            <th className="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-wider">Status</th>
-            <th className="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-wider">Tags & Work</th>
-            <th className="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-wider">Follow Up</th>
-            <th className="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-wider">Assigned</th>
-            <th className="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-wider text-right">Actions</th>
+          <tr className="bg-white border-b border-gray-100">
+            <th className="px-6 py-5 text-[10px] font-bold text-gray-400 uppercase tracking-widest sticky left-0 bg-white z-10 w-72">Contact / Company</th>
+            <th className="px-6 py-5 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Lead Source</th>
+            <th className="px-6 py-5 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Status</th>
+            <th className="px-6 py-5 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Work Type</th>
+            <th className="px-6 py-5 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Follow Up</th>
+            <th className="px-6 py-5 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Assigned</th>
+            <th className="px-6 py-5 text-[10px] font-bold text-gray-400 uppercase tracking-widest text-right">Actions</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-50">
           {data.map((row) => (
-            <tr key={row.id} className="group hover:bg-gray-50/80 transition-all duration-200">
+            <tr key={row.id} className="group hover:bg-slate-50/50 transition-colors duration-200">
               {/* Name & Company - Sticky Column */}
-              <td className="px-6 py-4 sticky left-0 bg-white group-hover:bg-gray-50/80 transition-all border-r border-transparent group-hover:border-gray-100 z-10">
+              <td className="px-6 py-4 sticky left-0 bg-white group-hover:bg-slate-50/50 transition-colors border-r border-transparent group-hover:border-gray-100 z-10">
                 <div className="flex items-center gap-4">
                   <AvatarPlaceholder name={row.contactName} />
-                  <div className="flex flex-col">
-                    <button onClick={() => onView(row)} className="font-bold text-gray-900 text-sm group-hover:text-brand-600 transition-colors text-left">{row.contactName || 'No Name'}</button>
-                    <span className="text-xs font-medium text-gray-500">{row.company || 'No Company'}</span>
+                  <div className="flex flex-col min-w-0">
+                    <button onClick={() => onView(row)} className="font-bold text-gray-900 text-sm group-hover:text-brand-600 transition-colors text-left truncate">
+                        {row.contactName || 'No Name'}
+                    </button>
+                    <span className="text-xs font-medium text-gray-500 truncate max-w-[140px]">{row.company || 'No Company'}</span>
                     
                     {/* Hover Quick Actions */}
-                    <div className="flex gap-3 mt-1.5 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0">
-                        <a href={`tel:${row.phone}`} className="text-gray-400 hover:text-brand-600 transition-colors" title={row.phone}><Phone className="h-3.5 w-3.5" /></a>
-                        <a href={`mailto:${row.email}`} className="text-gray-400 hover:text-brand-600 transition-colors" title={row.email}><Mail className="h-3.5 w-3.5" /></a>
+                    <div className="flex gap-2 mt-1.5 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-1 group-hover:translate-y-0">
+                        <a href={`tel:${row.phone}`} className="p-1 rounded-md hover:bg-brand-50 text-gray-400 hover:text-brand-600 transition-colors" title={row.phone}><Phone className="h-3 w-3" /></a>
+                        <a href={`mailto:${row.email}`} className="p-1 rounded-md hover:bg-brand-50 text-gray-400 hover:text-brand-600 transition-colors" title={row.email}><Mail className="h-3 w-3" /></a>
                     </div>
                   </div>
                 </div>
@@ -158,7 +160,7 @@ export const CRMTable: React.FC<CRMTableProps> = ({ data, isLoading, onView, onD
               {/* Lead Source */}
               <td className="px-6 py-4">
                 {row.leadSources && row.leadSources.length > 0 ? (
-                  <span className="inline-flex items-center px-2.5 py-1 rounded-md text-[11px] font-semibold bg-gray-100 text-gray-600 border border-gray-200">
+                  <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-bold bg-gray-50 text-gray-600 border border-gray-200">
                     {row.leadSources[0]}
                   </span>
                 ) : (
@@ -171,57 +173,60 @@ export const CRMTable: React.FC<CRMTableProps> = ({ data, isLoading, onView, onD
                 <StatusDropdown entry={row} onStatusChange={onStatusChange} />
               </td>
 
-              {/* Tags/Work */}
+              {/* Work Type (Tags) */}
               <td className="px-6 py-4">
-                 <div className="flex flex-wrap gap-1.5 max-w-[220px]">
-                    {(row.tags || []).slice(0, 2).map(tag => (
-                        <span key={tag} className="px-2 py-1 bg-purple-50 text-purple-700 text-[10px] font-semibold rounded-md border border-purple-100/50">{tag}</span>
-                    ))}
+                 <div className="flex flex-wrap gap-1.5 max-w-[200px]">
                     {(row.work || []).slice(0, 2).map((w: any) => {
                          const label = typeof w === 'object' ? w.name : w;
                          return (
-                            <span key={label} className="px-2 py-1 bg-blue-50 text-blue-700 text-[10px] font-semibold rounded-md border border-blue-100/50">{label}</span>
+                            <span key={label} className="px-2 py-1 bg-blue-50 text-blue-700 text-[10px] font-bold rounded-md border border-blue-100/50 uppercase tracking-tight">{label}</span>
                          );
                     })}
-                    {((row.tags || []).length + (row.work || []).length) > 4 && (
-                        <span className="px-2 py-1 text-[10px] font-medium text-gray-400 bg-gray-50 rounded-md">+{ (row.tags || []).length + (row.work || []).length - 4}</span>
+                    {(row.work || []).length > 2 && (
+                        <span className="px-2 py-1 text-[10px] font-bold text-gray-400 bg-gray-50 rounded-md border border-gray-100">+{ (row.work || []).length - 2}</span>
                     )}
+                    {(!row.work?.length) && <span className="text-gray-300 text-xs">-</span>}
                  </div>
               </td>
 
               {/* Follow Up */}
               <td className="px-6 py-4">
-                <div className="flex flex-col">
-                    <span className={`text-xs font-semibold ${getFollowUpColor(row.nextFollowUp)}`}>
-                        {formatDate(row.nextFollowUp)}
-                    </span>
-                    <span className="text-[10px] text-gray-400 font-medium mt-0.5">Last: {formatDate(row.lastContact)}</span>
+                <div className="flex items-center gap-2">
+                    <div className={`p-1.5 rounded-lg ${getFollowUpColor(row.nextFollowUp).includes('red') ? 'bg-red-50 text-red-600' : 'bg-gray-50 text-gray-400'}`}>
+                        <Calendar className="h-3.5 w-3.5" />
+                    </div>
+                    <div className="flex flex-col">
+                        <span className={`text-xs font-bold ${getFollowUpColor(row.nextFollowUp)}`}>
+                            {formatDate(row.nextFollowUp)}
+                        </span>
+                        <span className="text-[10px] text-gray-400 font-medium">Last: {formatDate(row.lastContact)}</span>
+                    </div>
                 </div>
               </td>
 
               {/* Assigned */}
               <td className="px-6 py-4">
                 <div className="flex items-center gap-2">
-                    <div className="h-6 w-6 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 text-[10px] flex items-center justify-center text-gray-600 font-bold border border-white shadow-sm">
+                    <div className="h-6 w-6 rounded-lg bg-gradient-to-tr from-gray-100 to-gray-50 text-[10px] flex items-center justify-center text-gray-600 font-bold border border-gray-200 shadow-sm">
                         {row.assignedTo ? row.assignedTo.charAt(0).toUpperCase() : '?'}
                     </div>
-                    <span className="text-sm text-gray-600 font-medium">{row.assignedTo || 'Unassigned'}</span>
+                    <span className="text-xs font-semibold text-gray-700">{row.assignedTo || 'Unassigned'}</span>
                 </div>
               </td>
 
               {/* Actions */}
               <td className="px-6 py-4 text-right">
-                <div className="flex items-center justify-end gap-2">
+                <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-all duration-200 translate-x-2 group-hover:translate-x-0">
                     <button 
                         onClick={() => onView(row)} 
-                        className="p-2 text-gray-400 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition-all opacity-0 group-hover:opacity-100"
+                        className="p-2 text-gray-400 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition-colors"
                         title="View Details"
                     >
                         <Eye className="h-4 w-4" />
                     </button>
                     <button 
                         onClick={() => onDelete(row.id)} 
-                        className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all opacity-0 group-hover:opacity-100"
+                        className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                         title="Delete"
                     >
                         <Trash2 className="h-4 w-4" />

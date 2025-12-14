@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Save, Building, Hash, Check, History, HardDrive, Globe, Linkedin, Instagram, Facebook, Twitter, Link as LinkIcon, User } from 'lucide-react';
 import { CRMEntry, CRMStatus, SocialLinks } from '../../types';
-import { getWorkTypeStyles } from '../../utils';
+import { getWorkTypeStyles, formatDateTime } from '../../utils';
 import { CustomSelect } from '../ui/CustomSelect';
 
 interface CompaniesFormProps {
@@ -260,7 +260,7 @@ export const CompaniesForm: React.FC<CompaniesFormProps> = ({ isOpen, onClose, o
                         <div className="flex items-center gap-2 text-xs text-gray-400">
                             <History className="h-3.5 w-3.5" />
                             <span>
-                                Last updated by <span className="font-semibold text-gray-600">{formData.lastUpdatedBy}</span> on {formData.lastUpdatedAt}
+                                Last updated by <span className="font-semibold text-gray-600">{formData.lastUpdatedBy}</span> on {formatDateTime(formData.lastUpdatedAt || '')}
                             </span>
                         </div>
                     </div>

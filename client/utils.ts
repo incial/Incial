@@ -17,7 +17,7 @@ export const formatDate = (dateString: string) => {
       return new Intl.DateTimeFormat('en-IN', { month: 'short', day: 'numeric', year: 'numeric' }).format(date);
   }
 
-  // ISO Strings (Timestamps) - Convert to IST
+  // ISO Strings (Timestamps)
   const date = new Date(dateString);
   return new Intl.DateTimeFormat('en-IN', { 
       month: 'short', 
@@ -30,14 +30,15 @@ export const formatDate = (dateString: string) => {
 export const formatDateTime = (dateString: string) => {
   if (!dateString) return '-';
   const date = new Date(dateString);
+  // Display time in IST (Asia/Kolkata) to match backend data
   return new Intl.DateTimeFormat('en-IN', { 
-    month: 'short', 
     day: 'numeric', 
+    month: 'short', 
     year: 'numeric',
     hour: 'numeric',
     minute: '2-digit',
     hour12: true,
-    timeZone: 'Asia/Kolkata'
+    timeZone: 'Asia/Kolkata' 
   }).format(date);
 };
 

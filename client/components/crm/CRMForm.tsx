@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Save, Edit2, User, Phone, Mail, Calendar, Briefcase, FileText, Tag, DollarSign, CheckCircle, Clock, AlertCircle, History, ExternalLink, HardDrive, Linkedin, Instagram, Facebook, Twitter, Globe, Link as LinkIcon, Maximize2, Minimize2, MapPin, Hash, Building } from 'lucide-react';
 import { CRMEntry, SocialLinks, CRMStatus } from '../../types';
-import { getStatusStyles, formatDate, getFollowUpColor, formatMoney, getWorkTypeStyles } from '../../utils';
+import { getStatusStyles, formatDate, getFollowUpColor, formatMoney, getWorkTypeStyles, formatDateTime } from '../../utils';
 import { CustomDatePicker } from '../ui/CustomDatePicker';
 import { CustomSelect } from '../ui/CustomSelect';
 import { usersApi } from '../../services/api';
@@ -432,6 +432,18 @@ export const CRMForm: React.FC<CRMFormProps> = ({ isOpen, onClose, onSubmit, ini
                 </div>
             </div>
         </div>
+
+        {/* Update History Footer */}
+        {formData.lastUpdatedBy && (
+            <div className="flex items-center justify-end pt-4 mt-6 border-t border-gray-100">
+                <div className="flex items-center gap-2 text-xs text-gray-400">
+                    <History className="h-3.5 w-3.5" />
+                    <span>
+                        Last updated by <span className="font-semibold text-gray-600">{formData.lastUpdatedBy}</span> on {formatDateTime(formData.lastUpdatedAt || '')}
+                    </span>
+                </div>
+            </div>
+        )}
 
         {/* Action Buttons */}
         <div className="flex justify-end gap-3 pt-6 border-t border-gray-100">

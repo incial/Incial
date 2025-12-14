@@ -2,7 +2,7 @@
 import React from 'react';
 import { X, Hash, User, Calendar, Tag, Clock, ExternalLink, HardDrive, Linkedin, Instagram, Facebook, Twitter, Globe, Link as LinkIcon, Edit2 } from 'lucide-react';
 import { CRMEntry } from '../../types';
-import { getCompanyStatusStyles, getWorkTypeStyles, formatDate } from '../../utils';
+import { getCompanyStatusStyles, getWorkTypeStyles, formatDate, formatDateTime } from '../../utils';
 
 interface CompanyDetailsModalProps {
   isOpen: boolean;
@@ -187,7 +187,7 @@ export const CompanyDetailsModal: React.FC<CompanyDetailsModalProps> = ({ isOpen
                             <Clock className="h-3 w-3" /> Last Update
                         </p>
                         <p className="text-sm font-medium text-gray-700">
-                            {formatDate(company.lastUpdatedAt || '')} <span className="text-gray-400 text-xs">by {company.lastUpdatedBy}</span>
+                            Last updated by {company.lastUpdatedBy} on {formatDateTime(company.lastUpdatedAt || '')}
                         </p>
                     </div>
                 )}

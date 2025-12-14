@@ -4,7 +4,7 @@ import { X, Save, Calendar, User, AlignLeft, Flag, CheckCircle, History, Link as
 import { Task, TaskPriority, TaskStatus } from '../../types';
 import { CustomDatePicker } from '../ui/CustomDatePicker';
 import { CustomSelect } from '../ui/CustomSelect';
-import { formatDate } from '../../utils';
+import { formatDate, formatDateTime } from '../../utils';
 import { usersApi } from '../../services/api';
 
 interface TaskFormProps {
@@ -188,9 +188,8 @@ export const TaskForm: React.FC<TaskFormProps> = ({ isOpen, onClose, onSubmit, i
                     {formData.lastUpdatedBy && (
                         <p className="flex items-center gap-1">
                             <History className="h-3 w-3" /> 
-                            Updated by <span className="font-semibold">{formData.lastUpdatedBy}</span> 
-                            <span className="mx-1">•</span> 
-                            {formData.lastUpdatedAt}
+                            Last updated by <span className="font-semibold">{formData.lastUpdatedBy}</span> 
+                            on {formatDateTime(formData.lastUpdatedAt || '')}
                         </p>
                     )}
                </div>
