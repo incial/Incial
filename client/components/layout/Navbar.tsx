@@ -156,9 +156,17 @@ export const Navbar: React.FC = () => {
                 className="flex items-center gap-3 pl-2 pr-1 py-1 rounded-xl hover:bg-gray-50 transition-all cursor-pointer group outline-none"
             >
                 <div className="relative">
-                    <div className="h-10 w-10 rounded-full bg-gradient-to-tr from-brand-600 to-indigo-600 flex items-center justify-center text-white font-bold border-2 border-white shadow-lg shadow-brand-500/20 group-hover:scale-105 transition-transform">
-                        {user?.name?.charAt(0)}
-                    </div>
+                    {user?.avatarUrl ? (
+                        <img 
+                            src={user.avatarUrl} 
+                            alt={user.name} 
+                            className="h-10 w-10 rounded-full object-cover border-2 border-white shadow-lg shadow-brand-500/20 group-hover:scale-105 transition-transform"
+                        />
+                    ) : (
+                        <div className="h-10 w-10 rounded-full bg-gradient-to-tr from-brand-600 to-indigo-600 flex items-center justify-center text-white font-bold border-2 border-white shadow-lg shadow-brand-500/20 group-hover:scale-105 transition-transform">
+                            {user?.name?.charAt(0)}
+                        </div>
+                    )}
                     <div className="absolute bottom-0 right-0 h-3 w-3 bg-green-500 border-2 border-white rounded-full"></div>
                 </div>
 

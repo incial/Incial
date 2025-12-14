@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { X, Save, Calendar, Clock, Link as LinkIcon, FileText, CheckCircle, AlignLeft, Video, Maximize2, Minimize2 } from 'lucide-react';
+import { X, Save, Calendar, Clock, Link as LinkIcon, FileText, AlignLeft, Video, Maximize2, Minimize2, Trash2, History } from 'lucide-react';
 import { Meeting, MeetingStatus } from '../../types';
 import { CustomSelect } from '../ui/CustomSelect';
 
@@ -8,25 +8,35 @@ interface MeetingFormProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (data: Partial<Meeting>) => void;
+  onDelete?: (id: number) => void;
   initialData?: Meeting;
 }
 
 const STATUSES: MeetingStatus[] = ['Scheduled', 'Completed', 'Cancelled', 'Postponed'];
 
-export const MeetingForm: React.FC<MeetingFormProps> = ({ isOpen, onClose, onSubmit, initialData }) => {
+export const MeetingForm: React.FC<MeetingFormProps> = ({ isOpen, onClose, onSubmit, onDelete, initialData }) => {
   const [formData, setFormData] = useState<Partial<Meeting>>({});
   const [isNotesExpanded, setIsNotesExpanded] = useState(false);
 
-  // Helper to format Date object to "YYYY-MM-DDThh:mm" for input
+  // Helper to format Date object to "YYYY-MM-DDThh:mm" for input (forcing IST context)
   const toDateTimeInput = (dateStr: string | Date) => {
+      if (!dateStr) return '';
       const date = new Date(dateStr);
-      // Format to sv-SE (YYYY-MM-DD hh:mm) in Asia/Kolkata timezone
-      const isoLikeStr = new Intl.DateTimeFormat('sv-SE', {
-          timeZone: 'Asia/Kolkata',
-          year: 'numeric', month: '2-digit', day: '2-digit', 
-          hour: '2-digit', minute: '2-digit'
-      }).format(date);
-      return isoLikeStr.replace(' ', 'T');
+      try {
+          // Use Intl to extract IST parts safely
+          const options: Intl.DateTimeFormatOptions = { 
+              timeZone: 'Asia/Kolkata', 
+              year: 'numeric', month: '2-digit', day: '2-digit', 
+              hour: '2-digit', minute: '2-digit', hour12: false 
+          };
+          const parts = new Intl.DateTimeFormat('en-US', options).formatToParts(date);
+          const getPart = (type: string) => parts.find(p => p.type === type)?.value || '00';
+          
+          return `${getPart('year')}-${getPart('month')}-${getPart('day')}T${getPart('hour')}:${getPart('minute')}`;
+      } catch (e) {
+          // Fallback to local if Intl fails
+          return date.toISOString().slice(0, 16);
+      }
   };
 
   useEffect(() => {
@@ -34,11 +44,9 @@ export const MeetingForm: React.FC<MeetingFormProps> = ({ isOpen, onClose, onSub
       if (initialData) {
         setFormData({
             ...initialData,
-            // Ensure the date is formatted correctly for the input
             dateTime: toDateTimeInput(initialData.dateTime)
         });
       } else {
-        // Create Mode defaults
         setFormData({
           title: '',
           dateTime: toDateTimeInput(new Date()), 
@@ -57,6 +65,14 @@ export const MeetingForm: React.FC<MeetingFormProps> = ({ isOpen, onClose, onSub
     if (!formData.title) return;
     onSubmit(formData);
     onClose();
+  };
+
+  const getDisplayName = (name?: string) => {
+      if (!name) return 'Unknown';
+      if (name.includes('@')) {
+          return name.split('@')[0];
+      }
+      return name;
   };
 
   return (
@@ -187,14 +203,37 @@ export const MeetingForm: React.FC<MeetingFormProps> = ({ isOpen, onClose, onSub
                       />
                   </div>
 
+                  {/* Audit Info - Hidden if updatedBy is missing */}
+                  {initialData?.lastUpdatedBy && (
+                      <div className="flex items-center gap-2 text-xs text-gray-400 mt-4 justify-end border-t border-gray-50 pt-3">
+                          <History className="h-3 w-3" />
+                          <span>
+                              Last updated by <span className="font-semibold text-gray-600">{getDisplayName(initialData.lastUpdatedBy)}</span>
+                              {initialData.lastUpdatedAt && ` on ${new Date(initialData.lastUpdatedAt).toLocaleString('en-IN', { month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: true })}`}
+                          </span>
+                      </div>
+                  )}
+
                   {/* Footer */}
-                  <div className="flex justify-end gap-3 pt-4 border-t border-gray-50">
-                      <button type="button" onClick={onClose} className="px-5 py-2.5 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-xl font-medium transition-colors">
-                          Cancel
-                      </button>
-                      <button type="submit" className="px-5 py-2.5 text-white bg-brand-600 hover:bg-brand-700 rounded-xl font-medium shadow-lg shadow-brand-500/20 flex items-center gap-2 transition-colors">
-                          <Save className="h-4 w-4" /> Save Meeting
-                      </button>
+                  <div className="flex items-center justify-between pt-4 border-t border-gray-50 mt-2">
+                      {initialData && onDelete ? (
+                          <button 
+                              type="button" 
+                              onClick={() => onDelete(initialData.id)} 
+                              className="px-4 py-2.5 text-red-600 bg-red-50 hover:bg-red-100 rounded-xl font-medium transition-colors flex items-center gap-2"
+                          >
+                              <Trash2 className="h-4 w-4" /> <span className="hidden sm:inline">Delete</span>
+                          </button>
+                      ) : <div></div>}
+                      
+                      <div className="flex gap-3">
+                          <button type="button" onClick={onClose} className="px-5 py-2.5 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-xl font-medium transition-colors">
+                              Cancel
+                          </button>
+                          <button type="submit" className="px-5 py-2.5 text-white bg-brand-600 hover:bg-brand-700 rounded-xl font-medium shadow-lg shadow-brand-500/20 flex items-center gap-2 transition-colors">
+                              <Save className="h-4 w-4" /> Save Meeting
+                          </button>
+                      </div>
                   </div>
 
               </form>

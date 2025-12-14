@@ -16,6 +16,8 @@ import { MeetingTrackerPage } from './pages/MeetingTrackerPage';
 import { UniversalCalendarPage } from './pages/UniversalCalendarPage';
 import { MyDashboardPage } from './pages/MyDashboardPage';
 import { ClientPortalPage } from './pages/ClientPortalPage';
+import { NotFoundPage } from './pages/NotFoundPage';
+import { UnauthorizedPage } from './pages/UnauthorizedPage';
 
 // 1. Super Admin Only Route
 const SuperAdminRoute: React.FC<{ children: React.ReactElement }> = ({ children }) => {
@@ -23,7 +25,7 @@ const SuperAdminRoute: React.FC<{ children: React.ReactElement }> = ({ children 
     if (!isAuthenticated) return <Navigate to="/login" replace />;
     
     if (user?.role !== 'ROLE_SUPER_ADMIN') {
-        return <Navigate to="/dashboard" replace />;
+        return <Navigate to="/unauthorized" replace />;
     }
     return children;
 };
@@ -36,7 +38,7 @@ const AdminRoute: React.FC<{ children: React.ReactElement }> = ({ children }) =>
     if (user?.role === 'ROLE_SUPER_ADMIN' || user?.role === 'ROLE_ADMIN') {
         return children;
     }
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to="/unauthorized" replace />;
 };
 
 // 3. Operational Route (SA + Admin + Employee)
@@ -154,9 +156,12 @@ const AppRoutes = () => {
                 </SuperAdminRoute>
             } />
 
+            {/* System Routes */}
+            <Route path="/unauthorized" element={<UnauthorizedPage />} />
+
             {/* Catch All */}
             <Route path="/" element={<RootRedirect />} />
-            <Route path="*" element={<RootRedirect />} />
+            <Route path="*" element={<NotFoundPage />} />
         </Routes>
     );
 }

@@ -2,12 +2,11 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Meeting, MeetingStatus } from '../../types';
 import { formatDateTime, getMeetingStatusStyles } from '../../utils';
-import { Edit2, Trash2, Video, Calendar, MoreHorizontal, Link as LinkIcon, ExternalLink, ChevronDown, Check } from 'lucide-react';
+import { Video, Calendar, Link as LinkIcon, ExternalLink, ChevronDown, Check, Clock } from 'lucide-react';
 
 interface MeetingTableProps {
   data: Meeting[];
   onEdit: (meeting: Meeting) => void;
-  onDelete: (id: number) => void;
   onStatusChange: (meeting: Meeting, newStatus: MeetingStatus) => void;
 }
 
@@ -57,7 +56,7 @@ const MeetingStatusDropdown = ({ meeting, onStatusChange }: { meeting: Meeting; 
     );
 };
 
-export const MeetingTable: React.FC<MeetingTableProps> = ({ data, onEdit, onDelete, onStatusChange }) => {
+export const MeetingTable: React.FC<MeetingTableProps> = ({ data, onEdit, onStatusChange }) => {
   const [expandedNoteId, setExpandedNoteId] = useState<number | null>(null);
 
   if (data.length === 0) {
@@ -81,8 +80,7 @@ export const MeetingTable: React.FC<MeetingTableProps> = ({ data, onEdit, onDele
                     <th className="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-wider">Date & Time</th>
                     <th className="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-wider">Status</th>
                     <th className="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-wider">Link</th>
-                    <th className="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-wider w-1/3">Notes</th>
-                    <th className="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-wider text-right">Actions</th>
+                    <th className="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-wider w-1/4">Notes</th>
                 </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
@@ -101,10 +99,16 @@ export const MeetingTable: React.FC<MeetingTableProps> = ({ data, onEdit, onDele
                             </div>
                         </td>
 
-                        {/* Date Time */}
+                        {/* Date Time - Formatted clearly */}
                         <td className="px-6 py-4">
-                            <div className={`text-sm font-medium ${new Date(meeting.dateTime) < new Date() && meeting.status !== 'Completed' && meeting.status !== 'Cancelled' ? 'text-red-600' : 'text-gray-700'}`}>
-                                {formatDateTime(meeting.dateTime)}
+                            <div className="flex flex-col">
+                                <span className={`text-sm font-semibold ${new Date(meeting.dateTime) < new Date() && meeting.status !== 'Completed' && meeting.status !== 'Cancelled' ? 'text-red-600' : 'text-gray-800'}`}>
+                                    {new Date(meeting.dateTime).toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' })}
+                                </span>
+                                <span className="text-xs text-gray-500 font-medium mt-0.5 flex items-center gap-1">
+                                    <Clock className="h-3 w-3" />
+                                    {new Date(meeting.dateTime).toLocaleTimeString('en-IN', { hour: 'numeric', minute: '2-digit', hour12: true })}
+                                </span>
                             </div>
                         </td>
 
@@ -142,18 +146,6 @@ export const MeetingTable: React.FC<MeetingTableProps> = ({ data, onEdit, onDele
                                     {meeting.notes || <span className="text-gray-300 italic">No notes</span>}
                                 </p>
                             </div>
-                        </td>
-
-                        {/* Actions */}
-                        <td className="px-6 py-4 text-right">
-                             <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <button onClick={() => onEdit(meeting)} className="p-1.5 text-gray-400 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition-colors">
-                                    <Edit2 className="h-4 w-4" />
-                                </button>
-                                <button onClick={() => onDelete(meeting.id)} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
-                                    <Trash2 className="h-4 w-4" />
-                                </button>
-                             </div>
                         </td>
                     </tr>
                 ))}

@@ -23,8 +23,6 @@ export const CompaniesPage: React.FC = () => {
   const [editingCompany, setEditingCompany] = useState<CRMEntry | undefined>(undefined);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  
-  // Delete State
   const [deleteId, setDeleteId] = useState<number | null>(null);
 
   const [filters, setFilters] = useState<CompanyFilterState>({
@@ -36,7 +34,6 @@ export const CompaniesPage: React.FC = () => {
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      // Use companiesApi for employees
       const data = await companiesApi.getAll();
       setCrmEntries(data);
     } catch (error) {
@@ -56,9 +53,7 @@ export const CompaniesPage: React.FC = () => {
   }, [crmEntries]);
 
   const categorizedData = useMemo(() => {
-      const active = allCompanies.filter(c => 
-          ['onboarded', 'on progress', 'Quote Sent'].includes(c.status)
-      );
+      const active = allCompanies.filter(c => ['onboarded', 'on progress', 'Quote Sent'].includes(c.status));
       const dropped = allCompanies.filter(c => c.status === 'drop');
       const past = allCompanies.filter(c => c.status === 'completed');
       return { active, dropped, past };
@@ -98,10 +93,8 @@ export const CompaniesPage: React.FC = () => {
               lastUpdatedBy: user?.name || 'Unknown',
               lastUpdatedAt: new Date().toISOString()
           };
-          
           setCrmEntries(crmEntries.map(e => e.id === updatedEntry.id ? updatedEntry : e));
           setIsEditModalOpen(false);
-          
           try {
             await companiesApi.update(updatedEntry.id, updatedEntry);
             showToast("Company details updated", "success");
@@ -119,13 +112,8 @@ export const CompaniesPage: React.FC = () => {
           lastUpdatedBy: user?.name || 'Unknown',
           lastUpdatedAt: new Date().toISOString()
       };
-
-      // Optimistic update
       setCrmEntries(prev => prev.map(e => e.id === company.id ? updatedEntry : e));
-
       try {
-          // SEND FULL OBJECT, NOT PARTIAL. 
-          // PUT requests often replace the entire resource or validate required fields.
           await companiesApi.update(company.id, updatedEntry);
           showToast(`Status updated to ${newStatus}`, "success");
       } catch (e) {
@@ -139,47 +127,17 @@ export const CompaniesPage: React.FC = () => {
       setIsViewModalOpen(true);
   };
 
-  const handleRequestDelete = (id: number) => {
-      setDeleteId(id);
-  };
-
   const confirmDelete = async () => {
       if(!deleteId) return;
       const id = deleteId;
-      
-      // Note: Delete is typically restricted for Employees in companiesApi, 
-      // but if the backend allows it via CRM endpoint for admins, this might fail for employees.
-      // We'll optimistically update but user might get an error if they lack permission.
       setCrmEntries(crmEntries.filter(e => e.id !== id));
       setDeleteId(null);
-
       try {
-          // Assuming employees CANNOT delete companies (as per usual business logic),
-          // but we leave this here if the button is visible.
-          // companiesApi does not have delete, so this might need crmApi.delete if valid.
-          // However, crmApi is 403. So we likely just don't support delete for employees here.
-          // For now, we will suppress the call or log it.
           console.warn("Delete action requested. Ensure backend permissions.");
       } catch (err) {
-          alert("Failed to delete");
           fetchData();
       }
   };
-
-  const getTabLabel = () => {
-      switch(activeTab) {
-          case 'active': return 'active';
-          case 'dropped': return 'dropped';
-          case 'past': return 'past work';
-          default: return 'records';
-      }
-  }
-
-  const itemToDeleteName = useMemo(() => {
-      if (!deleteId) return '';
-      const item = crmEntries.find(e => e.id === deleteId);
-      return item ? item.company : '';
-  }, [deleteId, crmEntries]);
 
   return (
     <div className="flex min-h-screen bg-[#F8FAFC]">
@@ -191,61 +149,64 @@ export const CompaniesPage: React.FC = () => {
           
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
             <div className="flex items-center gap-4">
-                <div className="h-12 w-12 bg-white rounded-xl border border-gray-200 flex items-center justify-center shadow-sm">
+                <div className="h-12 w-12 bg-white rounded-2xl border border-gray-200 flex items-center justify-center shadow-sm">
                     <Briefcase className="h-6 w-6 text-brand-600" />
                 </div>
                 <div>
-                    <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Companies Registry</h1>
+                    <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">Companies Registry</h1>
                     <p className="text-gray-500 mt-1 font-medium">Unified directory of all active accounts and past projects.</p>
                 </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-3xl shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] border border-gray-100/50 flex flex-col flex-1 overflow-hidden">
+          <div className="bg-white rounded-[2.5rem] shadow-sm border border-gray-100 flex flex-col flex-1 overflow-hidden">
             
-            <div className="flex items-center gap-1 p-2 border-b border-gray-100 bg-gray-50/50 overflow-x-auto">
-                <button 
-                    onClick={() => setActiveTab('active')}
-                    className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold transition-all whitespace-nowrap ${
-                        activeTab === 'active' 
-                        ? 'bg-white text-brand-600 shadow-sm ring-1 ring-gray-200' 
-                        : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100/50'
-                    }`}
-                >
-                    <Building className="h-4 w-4" />
-                    Active Companies
-                    <span className="bg-brand-50 text-brand-600 px-2 py-0.5 rounded-md text-xs border border-brand-100 ml-1">
-                        {categorizedData.active.length}
-                    </span>
-                </button>
-                <button 
-                    onClick={() => setActiveTab('past')}
-                    className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold transition-all whitespace-nowrap ${
-                        activeTab === 'past' 
-                        ? 'bg-white text-purple-600 shadow-sm ring-1 ring-gray-200' 
-                        : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100/50'
-                    }`}
-                >
-                    <CheckCircle className="h-4 w-4" />
-                    Past Works
-                    <span className="bg-purple-50 text-purple-600 px-2 py-0.5 rounded-md text-xs border border-purple-100 ml-1">
-                        {categorizedData.past.length}
-                    </span>
-                </button>
-                <button 
-                    onClick={() => setActiveTab('dropped')}
-                    className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold transition-all whitespace-nowrap ${
-                        activeTab === 'dropped' 
-                        ? 'bg-white text-red-600 shadow-sm ring-1 ring-gray-200' 
-                        : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100/50'
-                    }`}
-                >
-                    <Archive className="h-4 w-4" />
-                    Dropped Firms
-                    <span className="bg-gray-100 text-gray-600 px-2 py-0.5 rounded-md text-xs border border-gray-200 ml-1">
-                        {categorizedData.dropped.length}
-                    </span>
-                </button>
+            {/* Premium Tab Bar */}
+            <div className="px-6 pt-6 pb-2 border-b border-gray-100 bg-gray-50/30">
+                <div className="flex items-center gap-2 p-1 bg-gray-100/50 rounded-2xl w-fit">
+                    <button 
+                        onClick={() => setActiveTab('active')}
+                        className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all ${
+                            activeTab === 'active' 
+                            ? 'bg-white text-gray-900 shadow-sm ring-1 ring-gray-200' 
+                            : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200/50'
+                        }`}
+                    >
+                        <Building className="h-4 w-4" />
+                        Active
+                        <span className={`px-2 py-0.5 rounded-md text-xs border ml-1 ${activeTab === 'active' ? 'bg-gray-50 border-gray-200' : 'bg-gray-200 border-transparent'}`}>
+                            {categorizedData.active.length}
+                        </span>
+                    </button>
+                    <button 
+                        onClick={() => setActiveTab('past')}
+                        className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all ${
+                            activeTab === 'past' 
+                            ? 'bg-white text-gray-900 shadow-sm ring-1 ring-gray-200' 
+                            : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200/50'
+                        }`}
+                    >
+                        <CheckCircle className="h-4 w-4" />
+                        Past Works
+                        <span className={`px-2 py-0.5 rounded-md text-xs border ml-1 ${activeTab === 'past' ? 'bg-gray-50 border-gray-200' : 'bg-gray-200 border-transparent'}`}>
+                            {categorizedData.past.length}
+                        </span>
+                    </button>
+                    <button 
+                        onClick={() => setActiveTab('dropped')}
+                        className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all ${
+                            activeTab === 'dropped' 
+                            ? 'bg-white text-gray-900 shadow-sm ring-1 ring-gray-200' 
+                            : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200/50'
+                        }`}
+                    >
+                        <Archive className="h-4 w-4" />
+                        Archived
+                        <span className={`px-2 py-0.5 rounded-md text-xs border ml-1 ${activeTab === 'dropped' ? 'bg-gray-50 border-gray-200' : 'bg-gray-200 border-transparent'}`}>
+                            {categorizedData.dropped.length}
+                        </span>
+                    </button>
+                </div>
             </div>
 
             <CompaniesFilters filters={filters} setFilters={setFilters} onRefresh={fetchData} />
@@ -256,14 +217,14 @@ export const CompaniesPage: React.FC = () => {
                     isLoading={isLoading} 
                     onEdit={handleEdit}
                     onView={handleView}
-                    onDelete={handleRequestDelete}
+                    onDelete={(id) => setDeleteId(id)}
                     onStatusChange={handleStatusChange}
                 />
             </div>
             
-            <div className="p-4 border-t border-gray-50 bg-white text-xs font-medium text-gray-400 flex justify-between">
+            <div className="p-4 border-t border-gray-50 bg-white text-xs font-medium text-gray-400 flex justify-between rounded-b-[2.5rem]">
                 <span>
-                    Showing {displayData.length} {getTabLabel()} records
+                    Showing {displayData.length} records
                 </span>
                 <span>Synced with CRM</span>
             </div>
@@ -289,8 +250,7 @@ export const CompaniesPage: React.FC = () => {
             onClose={() => setDeleteId(null)}
             onConfirm={confirmDelete}
             title="Remove Company"
-            message="Are you sure you want to remove this company? This will also remove the associated deal from the CRM."
-            itemName={itemToDeleteName}
+            message="Are you sure you want to remove this company?"
         />
       </div>
     </div>

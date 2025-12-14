@@ -6,11 +6,12 @@ import { Edit2, Trash2, Paperclip, Check, ChevronDown, ExternalLink, Layout } fr
 
 interface ClientTaskTableProps {
   tasks: Task[];
+  userAvatarMap?: Record<string, string>;
   onEdit: (task: Task) => void;
   onDelete: (id: number) => void;
   onStatusChange: (task: Task, newStatus: TaskStatus) => void;
   onToggleVisibility: (task: Task) => void;
-  readOnly?: boolean; // New prop for Client Portal
+  readOnly?: boolean;
 }
 
 // Helper to get consistent styles
@@ -94,7 +95,7 @@ const TypeBadge = ({ type }: { type?: TaskType }) => {
     );
 };
 
-export const ClientTaskTable: React.FC<ClientTaskTableProps> = ({ tasks, onEdit, onDelete, onStatusChange, onToggleVisibility, readOnly = false }) => {
+export const ClientTaskTable: React.FC<ClientTaskTableProps> = ({ tasks, userAvatarMap, onEdit, onDelete, onStatusChange, onToggleVisibility, readOnly = false }) => {
   return (
     <div className="overflow-x-auto min-h-[400px]">
         <table className="w-full text-left border-collapse whitespace-nowrap">
@@ -114,6 +115,7 @@ export const ClientTaskTable: React.FC<ClientTaskTableProps> = ({ tasks, onEdit,
                 {tasks.map(task => {
                     const isCompleted = (task.status === 'Completed' || task.status === 'Done');
                     const shouldAnimate = isCompleted && isRecentlyUpdated(task.lastUpdatedAt, 10);
+                    const userAvatarUrl = task.assignedTo && userAvatarMap ? userAvatarMap[task.assignedTo] : undefined;
 
                     return (
                     <tr 
@@ -157,9 +159,13 @@ export const ClientTaskTable: React.FC<ClientTaskTableProps> = ({ tasks, onEdit,
                         {/* Assign */}
                         <td className="px-6 py-3">
                              <div className="flex items-center gap-2">
-                                <div className="h-6 w-6 rounded-full bg-brand-50 text-brand-600 border border-brand-100 flex items-center justify-center text-[10px] font-bold">
-                                    {(task.assignedTo && task.assignedTo !== 'Unassigned') ? task.assignedTo.charAt(0) : '?'}
-                                </div>
+                                {userAvatarUrl ? (
+                                    <img src={userAvatarUrl} alt={task.assignedTo || 'Assignee'} className="h-6 w-6 rounded-full object-cover border border-white shadow-sm" />
+                                ) : (
+                                    <div className="h-6 w-6 rounded-full bg-brand-50 text-brand-600 border border-brand-100 flex items-center justify-center text-[10px] font-bold">
+                                        {(task.assignedTo && task.assignedTo !== 'Unassigned') ? task.assignedTo.charAt(0) : '?'}
+                                    </div>
+                                )}
                                 <span className="text-sm text-gray-600 font-medium truncate max-w-[100px]">
                                     {task.assignedTo === 'Vallapata' ? 'Athul' : (task.assignedTo ? task.assignedTo.split(' ')[0] : 'Unassigned')}
                                 </span>

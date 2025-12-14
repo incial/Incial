@@ -8,7 +8,7 @@ import { MeetingTable } from '../components/meetings/MeetingTable';
 import { MeetingForm } from '../components/meetings/MeetingForm';
 import { MeetingsCalendar } from '../components/meetings/MeetingsCalendar';
 import { DeleteConfirmationModal } from '../components/ui/DeleteConfirmationModal';
-import { Calendar, Plus, Search, Filter, LayoutList, Clock, CheckCircle, Calendar as CalendarIcon } from 'lucide-react';
+import { Calendar, Plus, Search, LayoutList, Calendar as CalendarIcon, Archive, ChevronDown, ChevronRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 export const MeetingTrackerPage: React.FC = () => {
@@ -23,6 +23,7 @@ export const MeetingTrackerPage: React.FC = () => {
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const [activeFilter, setActiveFilter] = useState<'All' | MeetingStatus>('All');
   const [search, setSearch] = useState('');
+  const [isHistoryExpanded, setIsHistoryExpanded] = useState(false);
 
   const fetchData = async () => {
     setIsLoading(true);
@@ -40,12 +41,26 @@ export const MeetingTrackerPage: React.FC = () => {
     fetchData();
   }, []);
 
-  const filteredMeetings = useMemo(() => {
-      return meetings.filter(m => {
+  const { activeMeetings, historyMeetings } = useMemo(() => {
+      // 1. Base Filter (Search & Status)
+      const baseFiltered = meetings.filter(m => {
           const matchesSearch = m.title.toLowerCase().includes(search.toLowerCase());
           const matchesStatus = activeFilter === 'All' || m.status === activeFilter;
           return matchesSearch && matchesStatus;
-      }).sort((a, b) => new Date(b.dateTime).getTime() - new Date(a.dateTime).getTime());
+      });
+
+      // 2. Split into Active vs History
+      const active = baseFiltered.filter(m => !['Completed', 'Cancelled'].includes(m.status));
+      const history = baseFiltered.filter(m => ['Completed', 'Cancelled'].includes(m.status));
+
+      // 3. Sort
+      // Active: Ascending (Soonest first)
+      active.sort((a, b) => new Date(a.dateTime).getTime() - new Date(b.dateTime).getTime());
+      
+      // History: Descending (Most recent first)
+      history.sort((a, b) => new Date(b.dateTime).getTime() - new Date(a.dateTime).getTime());
+
+      return { activeMeetings: active, historyMeetings: history };
   }, [meetings, search, activeFilter]);
 
   const handleCreate = () => {
@@ -163,10 +178,10 @@ export const MeetingTrackerPage: React.FC = () => {
                             </button>
                         </div>
 
-                        {/* Status Filter (List View Only) */}
+                        {/* Status Filter (List View Only) - 'Completed' Removed */}
                         {viewMode === 'list' && (
                             <div className="flex items-center gap-2 overflow-x-auto pb-2 md:pb-0 hide-scrollbar">
-                                {['All', 'Scheduled', 'Completed', 'Cancelled', 'Postponed'].map((status) => (
+                                {['All', 'Scheduled', 'Postponed', 'Cancelled'].map((status) => (
                                     <button
                                         key={status}
                                         onClick={() => setActiveFilter(status as any)}
@@ -206,48 +221,93 @@ export const MeetingTrackerPage: React.FC = () => {
                     ) : (
                         <>
                             {viewMode === 'list' ? (
-                                <MeetingTable 
-                                    data={filteredMeetings} 
-                                    onEdit={handleEdit} 
-                                    onDelete={(id) => setDeleteId(id)} 
-                                    onStatusChange={handleStatusChange}
-                                />
+                                <div>
+                                    {/* Active Meetings Table */}
+                                    {activeMeetings.length > 0 ? (
+                                        <>
+                                            <div className="px-6 pt-4 pb-2">
+                                                <h3 className="text-xs font-bold text-brand-600 uppercase tracking-wide flex items-center gap-2">
+                                                    <div className="h-2 w-2 rounded-full bg-brand-500 animate-pulse" />
+                                                    Upcoming & Scheduled
+                                                </h3>
+                                            </div>
+                                            <MeetingTable 
+                                                data={activeMeetings} 
+                                                onEdit={handleEdit}
+                                                onStatusChange={handleStatusChange}
+                                            />
+                                        </>
+                                    ) : (
+                                        // Show specific empty state if no active but has history, otherwise global empty
+                                        historyMeetings.length === 0 ? (
+                                            <MeetingTable 
+                                                data={[]} 
+                                                onEdit={handleEdit}
+                                                onStatusChange={handleStatusChange}
+                                            />
+                                        ) : (
+                                            <div className="p-12 text-center text-gray-400 bg-white">
+                                                <p className="font-medium">No upcoming meetings scheduled.</p>
+                                                <p className="text-xs mt-1">Check the history below or create a new one.</p>
+                                            </div>
+                                        )
+                                    )}
+
+                                    {/* Completed History Section */}
+                                    {historyMeetings.length > 0 && (
+                                        <div className="border-t border-gray-100 mt-2">
+                                            <button 
+                                                onClick={() => setIsHistoryExpanded(!isHistoryExpanded)}
+                                                className="w-full flex items-center gap-2 p-4 bg-gray-50 hover:bg-gray-100 transition-colors text-left group"
+                                            >
+                                                <div className="p-1 rounded-md bg-gray-200 group-hover:bg-gray-300 transition-colors">
+                                                    {isHistoryExpanded ? <ChevronDown className="h-3 w-3 text-gray-600" /> : <ChevronRight className="h-3 w-3 text-gray-600" />}
+                                                </div>
+                                                <Archive className="h-4 w-4 text-gray-400" />
+                                                <h3 className="text-xs font-bold text-gray-600 uppercase tracking-wide">
+                                                    Meeting History ({historyMeetings.length})
+                                                </h3>
+                                            </button>
+
+                                            {isHistoryExpanded && (
+                                                <div className="bg-gray-50/30">
+                                                    <MeetingTable 
+                                                        data={historyMeetings} 
+                                                        onEdit={handleEdit}
+                                                        onStatusChange={handleStatusChange}
+                                                    />
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
                             ) : (
                                 <div className="h-full p-6">
-                                    <MeetingsCalendar 
-                                        meetings={filteredMeetings} 
-                                        onEdit={handleEdit} 
-                                    />
+                                    <MeetingsCalendar meetings={meetings} onEdit={handleEdit} />
                                 </div>
                             )}
                         </>
                     )}
                 </div>
-
-                {viewMode === 'list' && (
-                    <div className="p-3 border-t border-gray-50 bg-white text-xs font-medium text-gray-400 flex justify-between">
-                        <span>{filteredMeetings.length} records found</span>
-                        <span>Sorted by Date (Newest)</span>
-                    </div>
-                )}
            </div>
+
+           <MeetingForm 
+                isOpen={isModalOpen} 
+                onClose={() => setIsModalOpen(false)} 
+                onSubmit={handleSave}
+                initialData={editingMeeting}
+                onDelete={(id) => setDeleteId(id)}
+           />
+
+           <DeleteConfirmationModal 
+                isOpen={!!deleteId}
+                onClose={() => setDeleteId(null)}
+                onConfirm={handleDelete}
+                title="Delete Meeting"
+                message="Are you sure you want to delete this meeting?"
+           />
         </main>
       </div>
-
-      <MeetingForm 
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSubmit={handleSave}
-        initialData={editingMeeting}
-      />
-
-      <DeleteConfirmationModal 
-        isOpen={!!deleteId}
-        onClose={() => setDeleteId(null)}
-        onConfirm={handleDelete}
-        title="Delete Meeting"
-        message="Are you sure you want to delete this meeting record?"
-      />
     </div>
   );
 };

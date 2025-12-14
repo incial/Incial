@@ -4,16 +4,17 @@ import { Navbar } from '../components/layout/Navbar';
 import { Sidebar } from '../components/layout/Sidebar';
 import { tasksApi, usersApi } from '../services/api';
 import { Task } from '../types';
-import { Trophy, CheckCircle2, Target, Zap, Crown, Medal, TrendingUp, Star, Sparkles, LayoutGrid, Activity } from 'lucide-react';
+import { Trophy, CheckCircle2, Target, Zap, Crown, Medal, Star, Sparkles, LayoutGrid, Activity } from 'lucide-react';
 import { useToast } from '../context/ToastContext';
 
 interface UserStats {
   name: string;
   role: string;
+  avatarUrl?: string;
   total: number;
   completed: number;
   inProgress: number;
-  pending: number; // Not Started
+  pending: number;
   completionRate: number;
 }
 
@@ -31,22 +32,21 @@ export const AdminPerformancePage: React.FC = () => {
             usersApi.getAll()
         ]);
         
-        // Create user lookup map for roles
         const userRoleMap: Record<string, string> = {};
+        const userAvatarMap: Record<string, string> = {};
+        
         users.forEach(u => {
             userRoleMap[u.name] = u.role;
+            if (u.avatarUrl) userAvatarMap[u.name] = u.avatarUrl;
         });
         
-        // Group by User
         const userMap: Record<string, Task[]> = {};
-        
         tasks.forEach(task => {
             const assignee = task.assignedTo || 'Unassigned';
             if (!userMap[assignee]) userMap[assignee] = [];
             userMap[assignee].push(task);
         });
 
-        // Calculate Stats
         const calculatedStats: UserStats[] = Object.keys(userMap).map(user => {
             const userTasks = userMap[user];
             const total = userTasks.length;
@@ -54,7 +54,6 @@ export const AdminPerformancePage: React.FC = () => {
             const inProgress = userTasks.filter(t => t.status === 'In Progress').length;
             const pending = userTasks.filter(t => t.status === 'Not Started').length;
             
-            // Format Role
             const rawRole = userRoleMap[user] || (user === 'Unassigned' ? 'System' : 'Employee');
             const formattedRole = rawRole.replace('ROLE_', '').split('_')
                 .map(word => word.charAt(0) + word.slice(1).toLowerCase())
@@ -63,6 +62,7 @@ export const AdminPerformancePage: React.FC = () => {
             return {
                 name: user,
                 role: formattedRole,
+                avatarUrl: userAvatarMap[user],
                 total,
                 completed,
                 inProgress,
@@ -71,9 +71,7 @@ export const AdminPerformancePage: React.FC = () => {
             };
         });
 
-        // Sort by Completed count descending
         calculatedStats.sort((a, b) => b.completed - a.completed);
-
         setStats(calculatedStats);
       } catch (e) {
         console.error(e);
@@ -86,10 +84,8 @@ export const AdminPerformancePage: React.FC = () => {
     fetchAndCalculate();
   }, []);
 
-  // Global Metrics
   const totalTasks = stats.reduce((acc, s) => acc + s.total, 0);
   const avgCompletionRate = stats.length > 0 ? stats.reduce((acc, s) => acc + s.completionRate, 0) / stats.length : 0;
-
   const topPerformers = stats.slice(0, 3);
 
   const getRankConfig = (index: number) => {
@@ -132,46 +128,40 @@ export const AdminPerformancePage: React.FC = () => {
       <div className="flex-1 flex flex-col min-w-0 relative">
         <Navbar />
         
-        {/* Ambient Background Effects */}
         <div className="absolute top-0 left-0 w-full h-[500px] bg-gradient-to-b from-blue-50/50 to-transparent pointer-events-none z-0" />
-        <div className="absolute top-20 right-20 w-96 h-96 bg-purple-100/30 rounded-full blur-[100px] pointer-events-none z-0" />
-        <div className="absolute top-40 left-10 w-72 h-72 bg-blue-100/30 rounded-full blur-[80px] pointer-events-none z-0" />
-
+        
         <main className="flex-1 p-8 overflow-y-auto custom-scrollbar h-[calc(100vh-80px)] relative z-10">
            
-           {/* Header Section */}
-           <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-8 mb-12">
+           {/* New Header */}
+           <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-8 mb-16">
                 <div>
                     <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight flex items-center gap-3">
-                        <span className="bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600">
-                            Team Performance
-                        </span>
-                        <Trophy className="h-8 w-8 text-yellow-500 fill-yellow-500 hidden sm:block animate-bounce-slow" />
+                        Team Performance
+                        <Trophy className="h-8 w-8 text-yellow-500 fill-yellow-500 hidden sm:block" />
                     </h1>
-                    <p className="text-lg text-gray-500 mt-2 font-medium max-w-xl leading-relaxed">
-                        Real-time insights into team productivity, task completion rates, and leaderboard rankings.
+                    <p className="text-lg text-gray-500 mt-2 font-medium max-w-xl">
+                        Productivity insights and leaderboard rankings.
                     </p>
                 </div>
                 
-                {/* Global Stats Cards */}
-                <div className="flex flex-wrap gap-4">
-                    <div className="bg-white/80 backdrop-blur-sm px-6 py-4 rounded-2xl border border-white/50 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] flex items-center gap-4 hover:transform hover:scale-[1.02] transition-all duration-300">
-                        <div className="p-3 bg-gradient-to-br from-indigo-500 to-blue-600 text-white rounded-xl shadow-lg shadow-blue-500/20">
-                            <Target className="h-6 w-6" />
+                {/* Unified Stat Bar */}
+                <div className="flex bg-white rounded-2xl shadow-sm border border-gray-100 p-1.5">
+                    <div className="px-6 py-3 flex items-center gap-4 border-r border-gray-100">
+                        <div className="p-2 bg-indigo-50 text-indigo-600 rounded-xl">
+                            <Target className="h-5 w-5" />
                         </div>
                         <div>
-                            <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest">Total Tasks</p>
-                            <p className="text-2xl font-bold text-gray-900">{totalTasks}</p>
+                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Total Tasks</p>
+                            <p className="text-xl font-bold text-gray-900">{totalTasks}</p>
                         </div>
                     </div>
-                    
-                    <div className="bg-white/80 backdrop-blur-sm px-6 py-4 rounded-2xl border border-white/50 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] flex items-center gap-4 hover:transform hover:scale-[1.02] transition-all duration-300">
-                        <div className="p-3 bg-gradient-to-br from-emerald-400 to-green-600 text-white rounded-xl shadow-lg shadow-green-500/20">
-                            <CheckCircle2 className="h-6 w-6" />
+                    <div className="px-6 py-3 flex items-center gap-4">
+                        <div className="p-2 bg-emerald-50 text-emerald-600 rounded-xl">
+                            <CheckCircle2 className="h-5 w-5" />
                         </div>
                         <div>
-                            <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest">Completion</p>
-                            <p className="text-2xl font-bold text-gray-900">{avgCompletionRate.toFixed(0)}%</p>
+                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Completion</p>
+                            <p className="text-xl font-bold text-gray-900">{avgCompletionRate.toFixed(0)}%</p>
                         </div>
                     </div>
                 </div>
@@ -188,10 +178,9 @@ export const AdminPerformancePage: React.FC = () => {
              </div>
            ) : (
              <>
-                {/* 🏆 PODIUM SECTION */}
+                {/* Podium */}
                 <div className="mb-20 px-4">
                     <div className="flex flex-col md:flex-row justify-center items-end gap-6 md:gap-8 max-w-5xl mx-auto">
-                        {/* Map specific ranks to array indices for layout */}
                         {[topPerformers[1], topPerformers[0], topPerformers[2]].map((user, i) => {
                             if (!user) return null;
                             const rank = i === 1 ? 0 : i === 0 ? 1 : 2; 
@@ -199,30 +188,26 @@ export const AdminPerformancePage: React.FC = () => {
 
                             return (
                                 <div key={user.name} className={`w-full md:w-80 flex flex-col ${config.containerClass}`}>
-                                    <div className={`relative p-8 rounded-3xl border flex flex-col items-center text-center transition-all duration-500 hover:-translate-y-2 ${config.cardClass}`}>
+                                    <div className={`relative p-8 rounded-[2.5rem] border flex flex-col items-center text-center transition-all duration-500 hover:-translate-y-2 ${config.cardClass}`}>
                                         
-                                        {/* Rank Badge */}
                                         <div className="absolute -top-6">
                                             <div className="bg-white p-3 rounded-2xl shadow-lg border border-gray-100">
                                                 {config.icon}
                                             </div>
                                         </div>
 
-                                        {/* Avatar */}
                                         <div className="mt-6 mb-4 relative">
                                             <div className={`p-1.5 rounded-full bg-white shadow-sm ring-4 ${config.ringColor}`}>
-                                                <div className="h-20 w-20 rounded-full bg-gradient-to-tr from-gray-100 to-gray-200 flex items-center justify-center text-2xl font-bold text-gray-700 uppercase tracking-tighter">
-                                                    {user.name.slice(0, 2)}
-                                                </div>
+                                                {user.avatarUrl ? (
+                                                    <img src={user.avatarUrl} alt={user.name} className="h-20 w-20 rounded-full object-cover" />
+                                                ) : (
+                                                    <div className="h-20 w-20 rounded-full bg-gradient-to-tr from-gray-100 to-gray-200 flex items-center justify-center text-2xl font-bold text-gray-700 uppercase tracking-tighter">
+                                                        {user.name.slice(0, 2)}
+                                                    </div>
+                                                )}
                                             </div>
-                                            {rank === 0 && (
-                                                <div className="absolute -bottom-2 -right-2 bg-yellow-400 text-yellow-900 text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm flex items-center gap-1">
-                                                    <Sparkles className="h-3 w-3" /> Winner
-                                                </div>
-                                            )}
                                         </div>
 
-                                        {/* Content */}
                                         <h3 className={`text-xl font-bold mb-1 truncate w-full ${config.titleColor}`}>{user.name}</h3>
                                         <span className={`text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-md mb-6 ${config.badgeClass}`}>
                                             {user.role}
@@ -247,18 +232,14 @@ export const AdminPerformancePage: React.FC = () => {
                     </div>
                 </div>
 
-                {/* 📊 DETAILED TABLE SECTION */}
-                <div className="bg-white/90 backdrop-blur-xl rounded-[2rem] shadow-2xl border border-gray-100 overflow-hidden">
+                {/* Table */}
+                <div className="bg-white/90 backdrop-blur-xl rounded-[2.5rem] shadow-2xl border border-gray-100 overflow-hidden">
                     <div className="px-8 py-6 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white/50">
                         <div>
                             <h3 className="font-bold text-gray-900 text-lg flex items-center gap-2">
                                 <LayoutGrid className="h-5 w-5 text-gray-400" /> 
-                                Performance Breakdown
+                                Detailed Breakdown
                             </h3>
-                        </div>
-                        <div className="flex items-center gap-2 text-sm text-gray-500 bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-100">
-                            <Sparkles className="h-4 w-4 text-yellow-500" />
-                            <span>Top 3 highlighted</span>
                         </div>
                     </div>
                     
@@ -280,9 +261,13 @@ export const AdminPerformancePage: React.FC = () => {
                                                 <div className={`text-sm font-bold w-6 text-center ${idx < 3 ? 'text-yellow-500 scale-110' : 'text-gray-300'}`}>
                                                     {idx < 3 ? <Star className="h-4 w-4 fill-current" /> : `#${idx + 1}`}
                                                 </div>
-                                                <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center text-sm font-bold text-gray-600 shadow-sm border border-white">
-                                                    {user.name.charAt(0)}
-                                                </div>
+                                                {user.avatarUrl ? (
+                                                    <img src={user.avatarUrl} alt={user.name} className="h-10 w-10 rounded-xl object-cover shadow-sm border border-white" />
+                                                ) : (
+                                                    <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center text-sm font-bold text-gray-600 shadow-sm border border-white">
+                                                        {user.name.charAt(0)}
+                                                    </div>
+                                                )}
                                                 <div>
                                                     <span className="font-bold text-gray-900 block text-sm">{user.name}</span>
                                                     <span className="text-[10px] font-semibold text-brand-600 bg-brand-50 px-2 py-0.5 rounded border border-brand-100 uppercase tracking-wide">
@@ -291,48 +276,35 @@ export const AdminPerformancePage: React.FC = () => {
                                                 </div>
                                             </div>
                                         </td>
-                                        
                                         <td className="px-8 py-5">
                                             <div className="flex flex-col items-center gap-1">
                                                 <span className="text-xl font-bold text-gray-900">{user.completionRate.toFixed(0)}%</span>
                                                 {getPerformanceBadge(user.completionRate)}
                                             </div>
                                         </td>
-
                                         <td className="px-8 py-5">
                                             <div className="flex justify-center items-center gap-4 text-xs">
-                                                <div className="text-center group-hover:-translate-y-1 transition-transform">
+                                                <div className="text-center">
                                                     <span className="block font-bold text-green-600 text-lg">{user.completed}</span>
                                                     <span className="text-gray-400 font-medium">Done</span>
                                                 </div>
                                                 <div className="h-8 w-px bg-gray-200" />
-                                                <div className="text-center group-hover:-translate-y-1 transition-transform delay-75">
+                                                <div className="text-center">
                                                     <span className="block font-bold text-blue-600 text-lg">{user.inProgress}</span>
                                                     <span className="text-gray-400 font-medium">Active</span>
                                                 </div>
                                                 <div className="h-8 w-px bg-gray-200" />
-                                                <div className="text-center group-hover:-translate-y-1 transition-transform delay-100">
+                                                <div className="text-center">
                                                     <span className="block font-bold text-gray-500 text-lg">{user.pending}</span>
                                                     <span className="text-gray-400 font-medium">Todo</span>
                                                 </div>
                                             </div>
                                         </td>
-
                                         <td className="px-8 py-5">
                                             <div className="w-full max-w-xs mx-auto">
-                                                <div className="flex justify-between text-[10px] font-bold text-gray-400 uppercase mb-2 tracking-wider">
-                                                    <span>Progress</span>
-                                                    <span>{user.completed} / {user.total}</span>
-                                                </div>
                                                 <div className="h-3 w-full bg-gray-100 rounded-full overflow-hidden flex shadow-inner">
-                                                    <div 
-                                                        className="h-full bg-gradient-to-r from-emerald-400 to-green-500 transition-all duration-1000 ease-out shadow-[0_0_10px_rgba(16,185,129,0.4)]" 
-                                                        style={{ width: `${(user.completed / user.total) * 100}%` }}
-                                                    />
-                                                    <div 
-                                                        className="h-full bg-blue-400/30 transition-all duration-1000" 
-                                                        style={{ width: `${(user.inProgress / user.total) * 100}%` }}
-                                                    />
+                                                    <div className="h-full bg-gradient-to-r from-emerald-400 to-green-500" style={{ width: `${(user.completed / user.total) * 100}%` }} />
+                                                    <div className="h-full bg-blue-400/30" style={{ width: `${(user.inProgress / user.total) * 100}%` }} />
                                                 </div>
                                             </div>
                                         </td>
@@ -344,7 +316,6 @@ export const AdminPerformancePage: React.FC = () => {
                 </div>
              </>
            )}
-
         </main>
       </div>
     </div>

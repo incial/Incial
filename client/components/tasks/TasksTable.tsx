@@ -7,15 +7,28 @@ import { Edit2, Trash2, ChevronDown, Calendar, Check, Building } from 'lucide-re
 interface TasksTableProps {
   data: Task[];
   companyMap?: Record<number, string>;
+  userAvatarMap?: Record<string, string>;
   onEdit: (task: Task) => void;
   onDelete: (id: number) => void;
   onStatusChange: (task: Task, newStatus: TaskStatus) => void;
   onPriorityChange: (task: Task, newPriority: TaskPriority) => void;
 }
 
-const Avatar = ({ name }: { name: string | null | undefined }) => {
+const Avatar = ({ name, url }: { name: string | null | undefined; url?: string }) => {
     const safeName = name || 'Unassigned';
     const initials = safeName === 'Unassigned' ? '?' : safeName.slice(0, 2).toUpperCase();
+    
+    if (url) {
+        return (
+            <img 
+                src={url} 
+                alt={safeName} 
+                title={safeName}
+                className="h-6 w-6 rounded-full object-cover border border-white shadow-sm" 
+            />
+        );
+    }
+
     const bg = safeName === 'Unassigned' ? 'bg-gray-100 text-gray-400' : 'bg-brand-100 text-brand-700';
     return (
         <div className={`h-6 w-6 rounded-full flex items-center justify-center text-[10px] font-bold ${bg} border border-white shadow-sm`} title={safeName}>
@@ -125,7 +138,7 @@ const PriorityDropdown = ({ task, onPriorityChange }: { task: Task; onPriorityCh
 };
 
 
-export const TasksTable: React.FC<TasksTableProps> = ({ data, companyMap, onEdit, onDelete, onStatusChange, onPriorityChange }) => {
+export const TasksTable: React.FC<TasksTableProps> = ({ data, companyMap, userAvatarMap, onEdit, onDelete, onStatusChange, onPriorityChange }) => {
   return (
     <div className="overflow-x-auto bg-white min-h-[400px] pb-32">
         <table className="w-full text-left border-collapse whitespace-nowrap">
@@ -145,6 +158,7 @@ export const TasksTable: React.FC<TasksTableProps> = ({ data, companyMap, onEdit
                     const clientName = (task.companyId && companyMap) ? companyMap[task.companyId] : null;
                     const isCompleted = (task.status === 'Completed' || task.status === 'Done');
                     const shouldAnimate = isCompleted && isRecentlyUpdated(task.lastUpdatedAt, 10);
+                    const userAvatarUrl = task.assignedTo && userAvatarMap ? userAvatarMap[task.assignedTo] : undefined;
 
                     return (
                     <tr 
@@ -183,7 +197,7 @@ export const TasksTable: React.FC<TasksTableProps> = ({ data, companyMap, onEdit
                         {/* Assignee */}
                         <td className="px-6 py-3">
                              <div className="flex items-center gap-2">
-                                <Avatar name={task.assignedTo} />
+                                <Avatar name={task.assignedTo} url={userAvatarUrl} />
                                 <span className="text-xs font-medium text-gray-600">{task.assignedTo || 'Unassigned'}</span>
                              </div>
                         </td>

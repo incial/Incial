@@ -6,9 +6,10 @@ import { MoreHorizontal, Plus, Calendar } from 'lucide-react';
 
 interface TasksKanbanProps {
   tasks: Task[];
+  userAvatarMap?: Record<string, string>;
   onEdit: (task: Task) => void;
   onStatusChange: (task: Task, newStatus: TaskStatus) => void;
-  readOnly?: boolean; // New prop
+  readOnly?: boolean; 
 }
 
 const KanbanColumn = ({ 
@@ -16,6 +17,7 @@ const KanbanColumn = ({
     status, 
     tasks, 
     color,
+    userAvatarMap,
     onEdit,
     onDrop,
     readOnly
@@ -24,6 +26,7 @@ const KanbanColumn = ({
     status: TaskStatus, 
     tasks: Task[], 
     color: string,
+    userAvatarMap?: Record<string, string>,
     onEdit: (t: Task) => void,
     onDrop: (taskId: number, newStatus: TaskStatus) => void,
     readOnly?: boolean
@@ -94,6 +97,7 @@ const KanbanColumn = ({
                 {tasks.map(task => {
                     const isCompleted = (task.status === 'Completed' || task.status === 'Done');
                     const shouldAnimate = isCompleted && isRecentlyUpdated(task.lastUpdatedAt, 10);
+                    const userAvatarUrl = task.assignedTo && userAvatarMap ? userAvatarMap[task.assignedTo] : undefined;
 
                     return (
                     <div 
@@ -131,9 +135,15 @@ const KanbanColumn = ({
                                 {formatDate(task.dueDate).split(',')[0]}
                             </div>
                             {task.assignedTo !== 'Unassigned' && (
-                                <div className="h-6 w-6 rounded-full bg-brand-50 text-brand-600 text-[10px] font-bold flex items-center justify-center border border-brand-100">
-                                    {task.assignedTo.slice(0, 2).toUpperCase()}
-                                </div>
+                                <>
+                                    {userAvatarUrl ? (
+                                        <img src={userAvatarUrl} alt={task.assignedTo} className="h-6 w-6 rounded-full object-cover border border-gray-100" />
+                                    ) : (
+                                        <div className="h-6 w-6 rounded-full bg-brand-50 text-brand-600 text-[10px] font-bold flex items-center justify-center border border-brand-100">
+                                            {task.assignedTo?.slice(0, 2).toUpperCase()}
+                                        </div>
+                                    )}
+                                </>
                             )}
                         </div>
                     </div>
@@ -150,7 +160,7 @@ const KanbanColumn = ({
     );
 };
 
-export const TasksKanban: React.FC<TasksKanbanProps> = ({ tasks, onEdit, onStatusChange, readOnly = false }) => {
+export const TasksKanban: React.FC<TasksKanbanProps> = ({ tasks, userAvatarMap, onEdit, onStatusChange, readOnly = false }) => {
     
     const handleDrop = (taskId: number, newStatus: TaskStatus) => {
         const task = tasks.find(t => t.id === taskId);
@@ -166,6 +176,7 @@ export const TasksKanban: React.FC<TasksKanbanProps> = ({ tasks, onEdit, onStatu
                 status="Not Started" 
                 color="bg-gray-400" 
                 tasks={tasks.filter(t => t.status === 'Not Started')} 
+                userAvatarMap={userAvatarMap}
                 onEdit={onEdit}
                 onDrop={handleDrop}
                 readOnly={readOnly}
@@ -175,6 +186,7 @@ export const TasksKanban: React.FC<TasksKanbanProps> = ({ tasks, onEdit, onStatu
                 status="In Progress" 
                 color="bg-blue-500" 
                 tasks={tasks.filter(t => t.status === 'In Progress')} 
+                userAvatarMap={userAvatarMap}
                 onEdit={onEdit}
                 onDrop={handleDrop}
                 readOnly={readOnly}
@@ -184,6 +196,7 @@ export const TasksKanban: React.FC<TasksKanbanProps> = ({ tasks, onEdit, onStatu
                 status="In Review" 
                 color="bg-purple-500" 
                 tasks={tasks.filter(t => t.status === 'In Review')} 
+                userAvatarMap={userAvatarMap}
                 onEdit={onEdit}
                 onDrop={handleDrop}
                 readOnly={readOnly}
@@ -193,6 +206,7 @@ export const TasksKanban: React.FC<TasksKanbanProps> = ({ tasks, onEdit, onStatu
                 status="Posted" 
                 color="bg-sky-500" 
                 tasks={tasks.filter(t => t.status === 'Posted')} 
+                userAvatarMap={userAvatarMap}
                 onEdit={onEdit}
                 onDrop={handleDrop}
                 readOnly={readOnly}
@@ -202,6 +216,7 @@ export const TasksKanban: React.FC<TasksKanbanProps> = ({ tasks, onEdit, onStatu
                 status="Completed" 
                 color="bg-green-500" 
                 tasks={tasks.filter(t => t.status === 'Completed' || t.status === 'Done')} 
+                userAvatarMap={userAvatarMap}
                 onEdit={onEdit}
                 onDrop={handleDrop}
                 readOnly={readOnly}

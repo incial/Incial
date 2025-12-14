@@ -3,7 +3,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Navbar } from '../components/layout/Navbar';
 import { Sidebar } from '../components/layout/Sidebar';
 import { useParams, Link } from 'react-router-dom';
-import { crmApi, tasksApi } from '../services/api';
+import { crmApi, tasksApi, usersApi } from '../services/api';
 import { CRMEntry, Task, TaskFilterState, TaskStatus } from '../types';
 import { ClientTaskTable } from '../components/client-tracker/ClientTaskTable';
 import { ClientTaskForm } from '../components/client-tracker/ClientTaskForm';
@@ -11,7 +11,7 @@ import { TasksKanban } from '../components/tasks/TasksKanban';
 import { TasksCalendar } from '../components/tasks/TasksCalendar';
 import { TasksFilter } from '../components/tasks/TasksFilter';
 import { DeleteConfirmationModal } from '../components/ui/DeleteConfirmationModal';
-import { CheckCircle, Plus, HardDrive, LayoutList, Calendar as CalendarIcon, User, ArrowLeft, ExternalLink, Kanban, Archive, ChevronDown, ChevronRight, PieChart, AlertCircle, Clock } from 'lucide-react';
+import { CheckCircle, Plus, HardDrive, LayoutList, Calendar as CalendarIcon, User, ArrowLeft, ExternalLink, Kanban, Archive, ChevronDown, ChevronRight, PieChart, AlertCircle, Clock, Building } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 type ViewMode = 'list' | 'kanban' | 'mine' | 'calendar';
@@ -21,6 +21,7 @@ export const ClientDetailsPage: React.FC = () => {
   const { user } = useAuth();
   const [client, setClient] = useState<CRMEntry | null>(null);
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [userAvatarMap, setUserAvatarMap] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(true);
   
   // UI State
@@ -43,13 +44,24 @@ export const ClientDetailsPage: React.FC = () => {
       setIsLoading(true);
       if (!id) return;
       try {
-        const crmData = await crmApi.getAll();
+        const [crmData, tasksData, usersData] = await Promise.all([
+            crmApi.getAll(),
+            tasksApi.getAll(),
+            usersApi.getAll()
+        ]);
+
         const foundClient = crmData.crmList.find(c => c.id === parseInt(id));
         setClient(foundClient || null);
 
-        const tasksData = await tasksApi.getAll();
         const clientTasks = tasksData.filter(t => t.companyId === parseInt(id));
         setTasks(clientTasks);
+
+        const uMap: Record<string, string> = {};
+        usersData.forEach(u => {
+            if (u.avatarUrl) uMap[u.name] = u.avatarUrl;
+        });
+        setUserAvatarMap(uMap);
+
       } catch (e) {
         console.error(e);
       } finally {
@@ -177,9 +189,25 @@ export const ClientDetailsPage: React.FC = () => {
                <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-8 relative z-10">
                    <div className="flex-1">
                        <div className="flex items-center gap-4 mb-3">
-                           <div className="h-16 w-16 bg-gradient-to-br from-brand-600 to-indigo-700 rounded-2xl flex items-center justify-center text-white text-2xl font-bold shadow-lg shadow-brand-500/20">
-                               {client.company.charAt(0)}
+                           {/* Logo Logic */}
+                           <div className="h-16 w-16 flex-shrink-0 rounded-2xl bg-white border border-gray-100 flex items-center justify-center overflow-hidden shadow-sm relative">
+                                {client.companyImageUrl ? (
+                                    <img 
+                                        src={client.companyImageUrl} 
+                                        alt={client.company} 
+                                        className="h-full w-full object-cover"
+                                        onError={(e) => {
+                                            e.currentTarget.style.display = 'none';
+                                            e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                                            e.currentTarget.nextElementSibling?.classList.add('flex');
+                                        }}
+                                    />
+                                ) : null}
+                                <div className={`${client.companyImageUrl ? 'hidden' : 'flex'} absolute inset-0 items-center justify-center text-gray-300`}>
+                                    <Building className="h-8 w-8" />
+                                </div>
                            </div>
+
                            <div>
                                <h1 className="text-3xl font-bold text-gray-900 tracking-tight">{client.company}</h1>
                                <div className="flex items-center gap-3 mt-1">
@@ -287,6 +315,7 @@ export const ClientDetailsPage: React.FC = () => {
                              
                              <ClientTaskTable 
                                 tasks={activeTasks} 
+                                userAvatarMap={userAvatarMap}
                                 onEdit={handleEdit} 
                                 onDelete={(id) => setDeleteId(id)} 
                                 onStatusChange={handleStatusChange}
@@ -313,6 +342,7 @@ export const ClientDetailsPage: React.FC = () => {
                                         <div className="bg-gray-50/30">
                                             <ClientTaskTable 
                                                 tasks={completedTasks} 
+                                                userAvatarMap={userAvatarMap}
                                                 onEdit={handleEdit} 
                                                 onDelete={(id) => setDeleteId(id)} 
                                                 onStatusChange={handleStatusChange}
@@ -330,6 +360,7 @@ export const ClientDetailsPage: React.FC = () => {
                         <div className="h-full p-6 bg-gray-50/30">
                             <TasksKanban 
                                 tasks={filteredBaseTasks} 
+                                userAvatarMap={userAvatarMap}
                                 onEdit={handleEdit} 
                                 onStatusChange={handleStatusChange} 
                                 readOnly={false}
