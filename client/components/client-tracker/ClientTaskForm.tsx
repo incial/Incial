@@ -1,9 +1,10 @@
 
 import React, { useState, useEffect } from 'react';
-import { X, Save, Calendar, User, AlignLeft, Tag, Layers, Flag, Link as LinkIcon, Edit2, ExternalLink, Clock, CheckCircle, History, Maximize2, Minimize2, Layout } from 'lucide-react';
-import { Task, TaskPriority, TaskStatus, TaskType } from '../../types';
+import { X, Save, Calendar, User as UserIcon, AlignLeft, Tag, Layers, Flag, Link as LinkIcon, Edit2, ExternalLink, Clock, CheckCircle, History, Maximize2, Minimize2, Layout } from 'lucide-react';
+import { Task, TaskPriority, TaskStatus, TaskType, User } from '../../types';
 import { formatDate, formatDateTime } from '../../utils';
 import { CustomSelect } from '../ui/CustomSelect';
+import { UserSelect } from '../ui/UserSelect';
 import { usersApi } from '../../services/api';
 
 interface ClientTaskFormProps {
@@ -21,13 +22,13 @@ export const ClientTaskForm: React.FC<ClientTaskFormProps> = ({ isOpen, onClose,
   const [formData, setFormData] = useState<Partial<Task>>({});
   const [mode, setMode] = useState<'view' | 'edit'>('view');
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
-  const [assigneeOptions, setAssigneeOptions] = useState<{ label: string; value: string }[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
 
   useEffect(() => {
       const fetchUsers = async () => {
           try {
-              const users = await usersApi.getAll();
-              setAssigneeOptions(users.map(u => ({ label: u.name, value: u.name })));
+              const fetchedUsers = await usersApi.getAll();
+              setUsers(fetchedUsers);
           } catch (e) {
               console.error("Failed to fetch assignees", e);
           }
@@ -116,7 +117,7 @@ export const ClientTaskForm: React.FC<ClientTaskFormProps> = ({ isOpen, onClose,
           <div className="grid grid-cols-2 gap-4 p-5 bg-gray-50 rounded-2xl border border-gray-100">
               <div>
                   <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1.5 flex items-center gap-2">
-                      <User className="h-3.5 w-3.5" /> Assignee
+                      <UserIcon className="h-3.5 w-3.5" /> Assignee
                   </p>
                   <div className="flex items-center gap-2">
                       <div className="h-8 w-8 rounded-full bg-brand-100 text-brand-600 flex items-center justify-center text-xs font-bold">
@@ -261,11 +262,11 @@ export const ClientTaskForm: React.FC<ClientTaskFormProps> = ({ isOpen, onClose,
                 </div>
 
                  <div>
-                    <CustomSelect 
+                    <UserSelect 
                         label="Assignee"
                         value={formData.assignedTo || ''}
                         onChange={(val) => setFormData({...formData, assignedTo: val})}
-                        options={assigneeOptions}
+                        users={users}
                         placeholder="Select Assignee"
                     />
                 </div>

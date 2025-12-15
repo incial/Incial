@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Users, Briefcase, Settings, PieChart, ChevronRight, CheckSquare, ListTodo, BarChart2, Calendar, CalendarDays, LayoutDashboard, Home, Command } from 'lucide-react';
+import { Users, Briefcase, Settings, PieChart, ChevronRight, CheckSquare, ListTodo, BarChart2, Calendar, LayoutDashboard, Home, Command } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useLayout } from '../../context/LayoutContext';
@@ -65,7 +65,9 @@ export const Sidebar: React.FC = () => {
       <div className={`h-[88px] flex items-center ${isSidebarCollapsed ? 'justify-center' : 'px-8'} transition-all duration-300`}>
         <div className="flex items-center gap-3.5 overflow-hidden whitespace-nowrap group cursor-pointer">
             <div className={`relative flex items-center justify-center rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 shadow-lg shadow-brand-500/30 transition-all duration-500 ${isSidebarCollapsed ? 'h-10 w-10' : 'h-9 w-9'}`}>
+                <div className={`relative flex items-center justify-center rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 shadow-lg shadow-brand-500/30 transition-all duration-500 ${isSidebarCollapsed ? 'h-10 w-10' : 'h-9 w-9'}`}>
                 <img src="/logo.png" alt="Incial" className="h-9 w-9 rounded-xl bg-white shadow-lg object-contain p-1 flex-shrink-0" />
+            </div>
             </div>
             
             {!isSidebarCollapsed && (
@@ -107,7 +109,6 @@ export const Sidebar: React.FC = () => {
                 {/* Operational - Everyone except Client */}
                 {isEmployee && (
                     <>
-                        <NavItem collapsed={isSidebarCollapsed} icon={CalendarDays} label="Calendar" to="/calendar" active={currentPath === '/calendar'} />
                         <NavItem collapsed={isSidebarCollapsed} icon={CheckSquare} label="Tasks Board" to="/tasks" active={currentPath.startsWith('/tasks')} />
                         <NavItem collapsed={isSidebarCollapsed} icon={Calendar} label="Meetings" to="/meetings" active={currentPath.startsWith('/meetings')} />
                         <NavItem collapsed={isSidebarCollapsed} icon={Briefcase} label="Companies" to="/companies" active={currentPath.startsWith('/companies')} />

@@ -74,10 +74,10 @@ export const Navbar: React.FC = () => {
   };
 
   return (
-    <header className="h-[72px] bg-white/90 backdrop-blur-xl border-b border-gray-200/80 flex items-center justify-between px-4 lg:px-8 sticky top-0 z-30 transition-all shadow-[0_2px_12px_-4px_rgba(0,0,0,0.02)]">
+    <header className="h-[64px] md:h-[72px] bg-white/90 backdrop-blur-xl border-b border-gray-200/80 flex items-center justify-between px-4 lg:px-8 sticky top-0 z-40 transition-all shadow-[0_2px_12px_-4px_rgba(0,0,0,0.02)]">
       
       {/* Left Section */}
-      <div className="flex items-center gap-4 lg:gap-6 flex-1 max-w-2xl">
+      <div className="flex items-center gap-3 lg:gap-6 flex-1 max-w-2xl">
           {/* Mobile Menu Trigger */}
           <button 
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -96,7 +96,7 @@ export const Navbar: React.FC = () => {
           </button>
 
           {/* Title (Mobile) / Search (Desktop) */}
-          <div className="flex-1 flex items-center gap-4">
+          <div className="flex-1 flex items-center gap-4 min-w-0">
              <span className="md:hidden text-lg font-bold text-gray-900 truncate">
                 {getPageTitle()}
              </span>
@@ -120,19 +120,29 @@ export const Navbar: React.FC = () => {
       </div>
 
       {/* Right Side Actions */}
-      <div className="flex items-center gap-3 lg:gap-6 ml-auto">
+      <div className="flex items-center gap-2 md:gap-3 lg:gap-6 ml-auto">
         
         {/* Quick Action (Desktop) */}
         {!isClient && (
-            <Link 
-                to="/tasks"
-                className="hidden sm:flex items-center gap-2 px-3.5 py-2 bg-brand-50 hover:bg-brand-100 text-brand-700 border border-brand-200/50 rounded-xl transition-all active:scale-95 group"
-            >
-                <div className="bg-white rounded-md p-0.5 shadow-sm group-hover:shadow text-brand-600">
-                    <Plus className="h-3.5 w-3.5" />
-                </div>
-                <span className="text-xs font-bold uppercase tracking-wide">New</span>
-            </Link>
+            <div className="hidden sm:flex items-center gap-3">
+                <Link 
+                    to="/tasks"
+                    className="flex items-center gap-2 px-3.5 py-2 bg-brand-50 hover:bg-brand-100 text-brand-700 border border-brand-200/50 rounded-xl transition-all active:scale-95 group"
+                >
+                    <div className="bg-white rounded-md p-0.5 shadow-sm group-hover:shadow text-brand-600">
+                        <Plus className="h-3.5 w-3.5" />
+                    </div>
+                    <span className="text-xs font-bold uppercase tracking-wide">New</span>
+                </Link>
+
+                <Link 
+                    to="/calendar"
+                    className="p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-900 rounded-xl transition-all active:scale-95"
+                    title="Universal Calendar"
+                >
+                    <CalendarDays className="h-5 w-5" />
+                </Link>
+            </div>
         )}
 
         <div className="h-6 w-px bg-gray-200 hidden sm:block"></div>
@@ -141,15 +151,15 @@ export const Navbar: React.FC = () => {
         <div className="relative" ref={notifRef}>
             <button 
                 onClick={() => setIsNotifOpen(!isNotifOpen)}
-                className={`relative p-2.5 rounded-xl transition-all duration-200 ${isNotifOpen ? 'bg-gray-100 text-gray-900' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'}`}
+                className={`relative p-2 rounded-xl transition-all duration-200 ${isNotifOpen ? 'bg-gray-100 text-gray-900' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'}`}
             >
                 <Bell className="h-5 w-5" />
-                <span className="absolute top-2.5 right-3 h-2 w-2 bg-red-500 rounded-full ring-2 ring-white"></span>
+                <span className="absolute top-2 right-2 h-2 w-2 bg-red-500 rounded-full ring-2 ring-white"></span>
             </button>
             
             {/* Notifications Dropdown */}
             {isNotifOpen && (
-                <div className="absolute right-0 top-full mt-3 w-80 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden animate-in fade-in zoom-in-95 duration-200 origin-top-right z-50">
+                <div className="absolute right-[-60px] md:right-0 top-full mt-3 w-80 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden animate-in fade-in zoom-in-95 duration-200 origin-top-right z-50">
                     <div className="p-4 border-b border-gray-50 flex justify-between items-center bg-gray-50/50">
                         <h3 className="font-bold text-gray-900">Notifications</h3>
                         <button className="text-xs font-bold text-brand-600 hover:underline">Mark all read</button>
@@ -190,7 +200,7 @@ export const Navbar: React.FC = () => {
         </div>
         
         {/* User Profile */}
-        <div className="relative pl-2" ref={profileRef}>
+        <div className="relative pl-1 md:pl-2" ref={profileRef}>
             <button 
                 onClick={() => setIsProfileOpen(!isProfileOpen)}
                 className="group flex items-center gap-3 outline-none"
@@ -200,7 +210,7 @@ export const Navbar: React.FC = () => {
                     <p className="text-[10px] font-bold text-gray-400 mt-1.5 uppercase tracking-wider">{user?.role.replace('ROLE_', '')}</p>
                 </div>
                 <div className="relative">
-                    <div className="h-10 w-10 rounded-xl bg-gradient-to-tr from-brand-600 to-indigo-600 p-0.5 shadow-lg shadow-brand-500/20 transition-transform group-hover:scale-105 active:scale-95">
+                    <div className="h-9 w-9 md:h-10 md:w-10 rounded-xl bg-gradient-to-tr from-brand-600 to-indigo-600 p-0.5 shadow-lg shadow-brand-500/20 transition-transform group-hover:scale-105 active:scale-95">
                         <div className="h-full w-full rounded-[10px] bg-white overflow-hidden">
                             {user?.avatarUrl ? (
                                 <img src={user.avatarUrl} alt={user.name} className="h-full w-full object-cover" />
@@ -280,7 +290,7 @@ export const Navbar: React.FC = () => {
 
       {/* Mobile Menu Overlay */}
       {isMobileMenuOpen && (
-        <div className="absolute top-[72px] left-0 w-full bg-white border-b border-gray-100 shadow-2xl py-3 px-4 flex flex-col gap-1 md:hidden max-h-[calc(100vh-5rem)] overflow-y-auto z-40 animate-in slide-in-from-top-2">
+        <div className="absolute top-[64px] left-0 w-full bg-white border-b border-gray-100 shadow-2xl py-3 px-4 flex flex-col gap-1 md:hidden max-h-[calc(100vh-4rem)] overflow-y-auto z-50 animate-in slide-in-from-top-2">
             <div className="mb-2 px-2 pt-2">
                 <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Navigation</p>
             </div>

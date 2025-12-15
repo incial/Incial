@@ -142,18 +142,18 @@ export const TasksPage: React.FC = () => {
       <div className="flex-1 flex flex-col min-w-0">
         <Navbar />
         
-        <main className="flex-1 flex flex-col p-8 overflow-y-auto custom-scrollbar h-[calc(100vh-80px)]">
+        <main className="flex-1 flex flex-col p-4 md:p-8 overflow-y-auto custom-scrollbar h-[calc(100vh-64px)] md:h-[calc(100vh-80px)]">
           
           {/* Header & Stats Bar */}
           <div className="flex flex-col md:flex-row items-end justify-between gap-6 mb-8">
              <div className="w-full">
-                <div className="flex items-center justify-between mb-6">
-                    <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight flex items-center gap-3">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                    <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight flex items-center gap-3">
                         Tasks Dashboard
                     </h1>
                     <button 
                         onClick={handleCreate}
-                        className="bg-brand-600 hover:bg-brand-700 text-white px-5 py-2.5 rounded-xl flex items-center gap-2 font-bold shadow-lg shadow-brand-500/30 transition-all active:scale-95"
+                        className="bg-brand-600 hover:bg-brand-700 text-white px-5 py-2.5 rounded-xl flex items-center justify-center gap-2 font-bold shadow-lg shadow-brand-500/30 transition-all active:scale-95 w-full md:w-auto"
                     >
                         <Plus className="h-5 w-5" />
                         New Task
@@ -161,15 +161,15 @@ export const TasksPage: React.FC = () => {
                 </div>
 
                 {/* Velocity Bar */}
-                <div className="flex bg-white rounded-2xl border border-gray-100 shadow-sm p-1.5 w-full md:w-fit">
-                    <div className="px-5 py-2 flex items-center gap-3 border-r border-gray-100">
+                <div className="flex flex-col sm:flex-row bg-white rounded-2xl border border-gray-100 shadow-sm p-1.5 w-full md:w-fit divide-y sm:divide-y-0 sm:divide-x divide-gray-100">
+                    <div className="px-5 py-2 flex items-center gap-3">
                         <div className="p-1.5 bg-blue-50 text-blue-600 rounded-lg"><Activity className="h-4 w-4" /></div>
                         <div>
                             <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Active</span>
                             <span className="text-lg font-bold text-gray-900">{activeTasks.length}</span>
                         </div>
                     </div>
-                    <div className="px-5 py-2 flex items-center gap-3 border-r border-gray-100">
+                    <div className="px-5 py-2 flex items-center gap-3">
                         <div className="p-1.5 bg-red-50 text-red-600 rounded-lg"><Zap className="h-4 w-4" /></div>
                         <div>
                             <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">High Priority</span>
@@ -187,10 +187,10 @@ export const TasksPage: React.FC = () => {
              </div>
           </div>
 
-          <div className="bg-white rounded-[2.5rem] shadow-sm border border-gray-100 flex flex-col flex-1 overflow-hidden">
+          <div className="bg-white rounded-3xl md:rounded-[2.5rem] shadow-sm border border-gray-100 flex flex-col flex-1 overflow-hidden">
             
             {/* View Switcher */}
-            <div className="flex items-center gap-1 p-2 border-b border-gray-100 overflow-x-auto bg-gray-50/30">
+            <div className="flex items-center gap-1 p-2 border-b border-gray-100 overflow-x-auto bg-gray-50/30 hide-scrollbar">
                 {[
                     { id: 'list', label: 'All Tasks', icon: LayoutList },
                     { id: 'kanban', label: 'Kanban Board', icon: Kanban },
@@ -268,7 +268,7 @@ export const TasksPage: React.FC = () => {
                             </div>
                         )}
                         {viewMode === 'kanban' && (
-                            <div className="h-full p-6 bg-gray-50/30">
+                            <div className="h-full p-4 md:p-6 bg-gray-50/30">
                                 <TasksKanban 
                                     tasks={filteredTasks} 
                                     userAvatarMap={userAvatarMap}
@@ -278,7 +278,7 @@ export const TasksPage: React.FC = () => {
                             </div>
                         )}
                         {viewMode === 'calendar' && (
-                            <div className="h-full p-6">
+                            <div className="h-full p-4 md:p-6">
                                 <TasksCalendar tasks={filteredTasks} onEdit={handleEdit} />
                             </div>
                         )}
@@ -286,7 +286,7 @@ export const TasksPage: React.FC = () => {
                 )}
             </div>
             
-            <div className="p-3 border-t border-gray-50 bg-white text-xs font-medium text-gray-400 flex justify-between rounded-b-[2.5rem]">
+            <div className="p-3 border-t border-gray-50 bg-white text-xs font-medium text-gray-400 flex justify-between rounded-b-3xl md:rounded-b-[2.5rem]">
                 <span>{activeTasks.length} active · {completedTasks.length} completed</span>
                 <span>Sorted by Priority & Date</span>
             </div>

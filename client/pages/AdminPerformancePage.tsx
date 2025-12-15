@@ -3,14 +3,17 @@ import React, { useState, useEffect } from 'react';
 import { Navbar } from '../components/layout/Navbar';
 import { Sidebar } from '../components/layout/Sidebar';
 import { tasksApi, usersApi } from '../services/api';
-import { Task } from '../types';
-import { Trophy, CheckCircle2, Target, Zap, Crown, Medal, Star, Sparkles, LayoutGrid, Activity, TrendingUp } from 'lucide-react';
+import { Trophy, Target, Zap, Crown, Medal, Activity, TrendingUp, LayoutGrid, X, Mail, Calendar, Shield, MapPin, CheckCircle2, Clock } from 'lucide-react';
 import { useToast } from '../context/ToastContext';
 
 interface UserStats {
+  id?: number;
   name: string;
+  email?: string;
   role: string;
+  rawRole?: string;
   avatarUrl?: string;
+  createdAt?: string;
   total: number;
   completed: number;
   inProgress: number;
@@ -22,6 +25,7 @@ export const AdminPerformancePage: React.FC = () => {
   const { showToast } = useToast();
   const [stats, setStats] = useState<UserStats[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedUser, setSelectedUser] = useState<UserStats | null>(null);
 
   useEffect(() => {
     const fetchAndCalculate = async () => {
@@ -41,9 +45,13 @@ export const AdminPerformancePage: React.FC = () => {
                 .join(' ');
 
             statsMap[u.name] = {
+                id: u.id,
                 name: u.name,
+                email: u.email,
                 role: formattedRole,
+                rawRole: u.role,
                 avatarUrl: u.avatarUrl,
+                createdAt: u.createdAt,
                 total: 0,
                 completed: 0,
                 inProgress: 0,
@@ -80,7 +88,7 @@ export const AdminPerformancePage: React.FC = () => {
             } else if (['Not Started'].includes(task.status)) {
                 s.pending++;
             }
-            // 'Dropped' counts towards total but not active buckets, lowering efficiency naturally
+            // 'Dropped' counts towards total but not active buckets
         });
 
         // 3. Calculate Rates & Convert to Array (Filtering out Unassigned)
@@ -93,15 +101,12 @@ export const AdminPerformancePage: React.FC = () => {
 
         // 4. SORTING LOGIC: Efficiency Score (Descending) -> Completed Count (Descending) -> Name (Ascending)
         finalStats.sort((a, b) => {
-            // Primary: Efficiency Score
             if (Math.abs(b.completionRate - a.completionRate) > 0.01) {
                 return b.completionRate - a.completionRate;
             }
-            // Secondary: Volume of Completed Tasks
             if (b.completed !== a.completed) {
                 return b.completed - a.completed;
             }
-            // Tertiary: Name
             return a.name.localeCompare(b.name);
         });
         
@@ -223,8 +228,10 @@ export const AdminPerformancePage: React.FC = () => {
 
                                 return (
                                     <div key={user.name} className={`w-full md:w-80 flex flex-col ${config.containerClass}`}>
-                                        <div className={`relative p-8 rounded-[2.5rem] border flex flex-col items-center text-center transition-all duration-500 hover:-translate-y-2 ${config.cardClass}`}>
-                                            
+                                        <div 
+                                            onClick={() => setSelectedUser(user)}
+                                            className={`relative p-8 rounded-[2.5rem] border flex flex-col items-center text-center transition-all duration-500 hover:-translate-y-2 cursor-pointer ${config.cardClass}`}
+                                        >
                                             <div className="absolute -top-6">
                                                 <div className="bg-white p-3 rounded-2xl shadow-lg border border-gray-100">
                                                     {config.icon}
@@ -296,7 +303,10 @@ export const AdminPerformancePage: React.FC = () => {
                                 {stats.map((user, idx) => (
                                     <tr key={user.name} className="hover:bg-blue-50/30 transition-colors group">
                                         <td className="px-8 py-5">
-                                            <div className="flex items-center gap-4">
+                                            <div 
+                                                className="flex items-center gap-4 cursor-pointer group/user"
+                                                onClick={() => setSelectedUser(user)}
+                                            >
                                                 <div className={`text-sm font-bold w-8 text-center flex-shrink-0 ${idx < 3 ? 'text-yellow-500 scale-110' : 'text-gray-300'}`}>
                                                     {idx < 3 ? <Crown className={`h-5 w-5 ${idx === 0 ? 'text-yellow-500' : idx === 1 ? 'text-slate-400' : 'text-orange-400'}`} /> : `#${idx + 1}`}
                                                 </div>
@@ -308,7 +318,7 @@ export const AdminPerformancePage: React.FC = () => {
                                                     </div>
                                                 )}
                                                 <div>
-                                                    <span className="font-bold text-gray-900 block text-sm">{user.name}</span>
+                                                    <span className="font-bold text-gray-900 block text-sm group-hover/user:text-brand-600 transition-colors underline-offset-4 group-hover/user:underline">{user.name}</span>
                                                     <span className="text-[10px] font-semibold text-brand-600 bg-brand-50 px-2 py-0.5 rounded border border-brand-100 uppercase tracking-wide">
                                                         {user.role}
                                                     </span>
@@ -364,6 +374,86 @@ export const AdminPerformancePage: React.FC = () => {
            )}
         </main>
       </div>
+
+      {/* User Profile Modal */}
+      {selectedUser && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200" onClick={() => setSelectedUser(null)}>
+            <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-md overflow-hidden flex flex-col transform transition-all scale-100 relative border border-gray-100" onClick={(e) => e.stopPropagation()}>
+                
+                {/* Close Button */}
+                <button 
+                    onClick={() => setSelectedUser(null)} 
+                    className="absolute top-4 right-4 z-20 p-2 bg-black/10 hover:bg-black/20 text-white rounded-full transition-colors backdrop-blur-sm"
+                >
+                    <X className="h-5 w-5" />
+                </button>
+
+                {/* Banner & Avatar */}
+                <div className="h-32 bg-gradient-to-r from-brand-600 to-indigo-600 relative">
+                    <img 
+                        src="/banner.png" 
+                        alt="Profile Banner" 
+                        className="w-full h-full object-cover absolute inset-0 z-0"
+                        onError={(e) => e.currentTarget.style.display = 'none'}
+                    />
+                    <div className="absolute -bottom-12 left-8 z-10">
+                        <div className="h-24 w-24 rounded-3xl bg-white p-1 shadow-lg border border-gray-100">
+                            {selectedUser.avatarUrl ? (
+                                <img src={selectedUser.avatarUrl} alt={selectedUser.name} className="h-full w-full rounded-2xl object-cover bg-gray-100" />
+                            ) : (
+                                <div className="h-full w-full rounded-2xl bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center text-2xl font-bold text-gray-400 uppercase tracking-tighter">
+                                    {selectedUser.name.slice(0, 2)}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+
+                {/* User Info */}
+                <div className="pt-14 pb-8 px-8">
+                    <div className="mb-6">
+                        <div className="flex items-center justify-between">
+                            <h2 className="text-2xl font-bold text-gray-900">{selectedUser.name}</h2>
+                            {/* Role removed as per request */}
+                        </div>
+                        <div className="space-y-1.5 mt-2">
+                            {selectedUser.email && (
+                                <div className="flex items-center gap-2 text-sm text-gray-500">
+                                    <Mail className="h-4 w-4" /> {selectedUser.email}
+                                </div>
+                            )}
+                            <div className="flex items-center gap-2 text-sm text-gray-500">
+                                <MapPin className="h-4 w-4" /> Remote Team Member
+                            </div>
+                            {selectedUser.createdAt && (
+                                <div className="flex items-center gap-2 text-sm text-gray-500">
+                                    <Calendar className="h-4 w-4" /> Joined {new Date(selectedUser.createdAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-3">
+                        <div className="bg-emerald-50 rounded-xl p-4 text-center border border-emerald-100">
+                            <div className="mb-1 text-emerald-600 flex justify-center"><CheckCircle2 className="h-5 w-5" /></div>
+                            <span className="block text-2xl font-black text-gray-900">{selectedUser.completed}</span>
+                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Done</span>
+                        </div>
+                        <div className="bg-blue-50 rounded-xl p-4 text-center border border-blue-100">
+                            <div className="mb-1 text-blue-600 flex justify-center"><Clock className="h-5 w-5" /></div>
+                            <span className="block text-2xl font-black text-gray-900">{selectedUser.inProgress}</span>
+                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Active</span>
+                        </div>
+                        <div className="bg-purple-50 rounded-xl p-4 text-center border border-purple-100">
+                            <div className="mb-1 text-purple-600 flex justify-center"><Target className="h-5 w-5" /></div>
+                            <span className="block text-2xl font-black text-gray-900">{selectedUser.completionRate.toFixed(0)}%</span>
+                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Score</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+      )}
     </div>
   );
 };

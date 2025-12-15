@@ -1,9 +1,10 @@
 
 import React, { useState, useEffect } from 'react';
-import { X, Save, Calendar, User, AlignLeft, Flag, CheckCircle, History, Link as LinkIcon, ExternalLink, Edit2, Clock, Building, Maximize2, Minimize2 } from 'lucide-react';
-import { Task, TaskPriority, TaskStatus } from '../../types';
+import { X, Save, Calendar, User as UserIcon, AlignLeft, Flag, CheckCircle, History, Link as LinkIcon, ExternalLink, Edit2, Clock, Building, Maximize2, Minimize2 } from 'lucide-react';
+import { Task, TaskPriority, TaskStatus, User } from '../../types';
 import { CustomDatePicker } from '../ui/CustomDatePicker';
 import { CustomSelect } from '../ui/CustomSelect';
+import { UserSelect } from '../ui/UserSelect';
 import { formatDate, formatDateTime } from '../../utils';
 import { usersApi } from '../../services/api';
 
@@ -22,19 +23,13 @@ export const TaskForm: React.FC<TaskFormProps> = ({ isOpen, onClose, onSubmit, i
   const [formData, setFormData] = useState<Partial<Task>>({});
   const [mode, setMode] = useState<'view' | 'edit'>('view');
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
-  const [assigneeOptions, setAssigneeOptions] = useState<{ label: string; value: string }[]>([
-      { label: "Unassigned", value: "Unassigned" }
-  ]);
+  const [users, setUsers] = useState<User[]>([]);
 
   useEffect(() => {
       const fetchUsers = async () => {
           try {
-              const users = await usersApi.getAll();
-              const options = [
-                  { label: "Unassigned", value: "Unassigned" },
-                  ...users.map(u => ({ label: u.name, value: u.name }))
-              ];
-              setAssigneeOptions(options);
+              const fetchedUsers = await usersApi.getAll();
+              setUsers(fetchedUsers);
           } catch (e) {
               console.error("Failed to fetch assignees", e);
           }
@@ -122,13 +117,13 @@ export const TaskForm: React.FC<TaskFormProps> = ({ isOpen, onClose, onSubmit, i
           <div className="grid grid-cols-2 gap-4 p-5 bg-gray-50 rounded-2xl border border-gray-100">
               <div>
                   <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1.5 flex items-center gap-2">
-                      <User className="h-3.5 w-3.5" /> Assignee
+                      <UserIcon className="h-3.5 w-3.5" /> Assignee
                   </p>
                   <div className="flex items-center gap-2">
                       <div className="h-8 w-8 rounded-full bg-brand-100 text-brand-600 flex items-center justify-center text-xs font-bold">
-                          {formData.assignedTo === 'Unassigned' ? '?' : formData.assignedTo?.charAt(0)}
+                          {formData.assignedTo === 'Unassigned' || !formData.assignedTo ? '?' : formData.assignedTo?.charAt(0)}
                       </div>
-                      <span className="font-semibold text-gray-700 text-sm">{formData.assignedTo}</span>
+                      <span className="font-semibold text-gray-700 text-sm">{formData.assignedTo || 'Unassigned'}</span>
                   </div>
               </div>
               <div>
@@ -237,19 +232,19 @@ export const TaskForm: React.FC<TaskFormProps> = ({ isOpen, onClose, onSubmit, i
                    />
                 </div>
 
-                {/* Assigned To */}
-                <div>
-                   <CustomSelect 
+                {/* Assigned To - Using New UserSelect */}
+                <div className="col-span-2 md:col-span-1">
+                   <UserSelect 
                         label="Assignee"
-                        value={formData.assignedTo || ''}
+                        value={formData.assignedTo || 'Unassigned'}
                         onChange={(val) => setFormData({...formData, assignedTo: val})}
-                        options={assigneeOptions}
+                        users={users}
                         placeholder="Select Assignee"
                    />
                 </div>
 
                 {/* Due Date */}
-                <div>
+                <div className="col-span-2 md:col-span-1">
                    <label className="flex items-center gap-2 text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">
                         Due Date
                    </label>

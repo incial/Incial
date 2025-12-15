@@ -170,17 +170,17 @@ export const CRMPage: React.FC = () => {
       <div className="flex-1 flex flex-col min-w-0">
         <Navbar />
         
-        <main className="flex-1 flex flex-col p-8 overflow-y-auto custom-scrollbar h-[calc(100vh-80px)]">
+        <main className="flex-1 flex flex-col p-4 md:p-8 overflow-y-auto custom-scrollbar h-[calc(100vh-64px)] md:h-[calc(100vh-80px)]">
           
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
              <div>
-                <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">Pipeline Dashboard</h1>
-                <p className="text-gray-500 mt-1 font-medium">Track and manage your customer relationships.</p>
+                <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight">Pipeline Dashboard</h1>
+                <p className="text-sm md:text-base text-gray-500 mt-1 font-medium">Track and manage your customer relationships.</p>
              </div>
              
              <button 
                 onClick={handleCreate}
-                className="bg-brand-600 hover:bg-brand-700 text-white px-5 py-2.5 rounded-xl flex items-center gap-2 font-bold shadow-lg shadow-brand-500/30 transition-all active:scale-95"
+                className="bg-brand-600 hover:bg-brand-700 text-white px-5 py-2.5 rounded-xl flex items-center gap-2 font-bold shadow-lg shadow-brand-500/30 transition-all active:scale-95 w-full md:w-auto justify-center"
              >
                 <Plus className="h-5 w-5" />
                 Add New Deal
@@ -189,7 +189,7 @@ export const CRMPage: React.FC = () => {
 
           <CRMStats entries={entries} />
 
-          <div className="bg-white rounded-[2.5rem] shadow-[0_2px_20px_-4px_rgba(0,0,0,0.04)] border border-gray-100 flex flex-col flex-1 overflow-hidden relative">
+          <div className="bg-white rounded-3xl md:rounded-[2.5rem] shadow-[0_2px_20px_-4px_rgba(0,0,0,0.04)] border border-gray-100 flex flex-col flex-1 overflow-hidden relative">
             <CRMFilters 
                 filters={filters} 
                 setFilters={setFilters} 
@@ -206,7 +206,7 @@ export const CRMPage: React.FC = () => {
                 />
             </div>
             
-            <div className="p-4 border-t border-gray-50 bg-white text-xs font-bold text-gray-400 flex justify-between uppercase tracking-wider rounded-b-[2.5rem]">
+            <div className="p-4 border-t border-gray-50 bg-white text-xs font-bold text-gray-400 flex justify-between uppercase tracking-wider rounded-b-3xl md:rounded-b-[2.5rem]">
                 <span>Showing {filteredData.length} records</span>
                 <span>Sorted by Newest</span>
             </div>
