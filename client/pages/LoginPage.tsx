@@ -2,11 +2,13 @@
 import React, { useState } from 'react';
 import { authApi } from '../services/api';
 import { useAuth } from '../context/AuthContext';
-import { Loader2, Command, ArrowRight, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Loader2, Command, ArrowRight, CheckCircle2, AlertCircle, Eye, EyeOff } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 export const LoginPage: React.FC = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const { login } = useAuth();
@@ -51,7 +53,6 @@ export const LoginPage: React.FC = () => {
                 {/* Logo Area */}
                 <div className="relative z-10">
                     <div className="flex items-center gap-3 font-bold text-2xl tracking-tight text-white">
-                        {/* Brand */}
                         <div className="relative z-10 flex items-center gap-3 text-2xl font-bold tracking-tight">
                             <img src="/logo.png" alt="Incial" className="h-10 w-10 rounded-xl bg-white shadow-lg object-contain p-1" />
                             Incial
@@ -139,16 +140,25 @@ export const LoginPage: React.FC = () => {
                         <div className="space-y-1.5">
                             <div className="flex justify-between items-center ml-1">
                                 <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide">Password</label>
-                                <a href="#" className="text-xs font-bold text-brand-600 hover:text-brand-700 hover:underline">Forgot password?</a>
+                                <Link to="/forgot-password" className="text-xs font-bold text-brand-600 hover:text-brand-700 hover:underline">Forgot password?</Link>
                             </div>
-                            <input
-                                type="password"
-                                value={password}
-                                onChange={e => setPassword(e.target.value)}
-                                className="w-full px-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:bg-white focus:outline-none focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all font-medium"
-                                placeholder="Enter your password"
-                                required
-                            />
+                            <div className="relative">
+                                <input
+                                    type={showPassword ? "text" : "password"}
+                                    value={password}
+                                    onChange={e => setPassword(e.target.value)}
+                                    className="w-full pl-4 pr-12 py-3.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:bg-white focus:outline-none focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all font-medium"
+                                    placeholder="Enter your password"
+                                    required
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors p-1"
+                                >
+                                    {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                                </button>
+                            </div>
                         </div>
 
                         <button
@@ -190,7 +200,7 @@ export const LoginPage: React.FC = () => {
                     </form>
 
                     <p className="text-center text-xs text-gray-400 mt-8 font-medium">
-                        Don't have an account? <a href="#" className="text-brand-600 font-bold hover:underline">Contact Sales</a>
+                        Don't have an account? <a href="mailto:incial@gmail.com" className="text-brand-600 font-bold hover:underline">Contact Sales</a>
                     </p>
                 </div>
             </div>

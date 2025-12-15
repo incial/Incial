@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { X, Save, Edit2, User, Phone, Mail, Calendar, Briefcase, FileText, Tag, DollarSign, CheckCircle, Clock, AlertCircle, History, ExternalLink, HardDrive, Linkedin, Instagram, Facebook, Twitter, Globe, Link as LinkIcon, Maximize2, Minimize2, MapPin, Hash, Building } from 'lucide-react';
+import { X, Save, Edit2, User, Phone, Mail, Calendar, Briefcase, FileText, Tag, DollarSign, CheckCircle, Clock, AlertCircle, History, ExternalLink, HardDrive, Linkedin, Instagram, Facebook, Twitter, Globe, Link as LinkIcon, Maximize2, Minimize2, MapPin, Hash, Building, Megaphone } from 'lucide-react';
 import { CRMEntry, SocialLinks, CRMStatus, User as UserType } from '../../types';
 import { getStatusStyles, formatDate, getFollowUpColor, formatMoney, getWorkTypeStyles, formatDateTime } from '../../utils';
 import { CustomDatePicker } from '../ui/CustomDatePicker';
@@ -22,6 +22,16 @@ const STATUS_OPTIONS: { label: string; value: CRMStatus }[] = [
     { label: 'Onboarded', value: 'onboarded' },
     { label: 'Completed', value: 'completed' },
     { label: 'Dropped', value: 'drop' },
+];
+
+const SOURCE_OPTIONS = [
+    { label: 'Website', value: 'Website' },
+    { label: 'Referral', value: 'Referral' },
+    { label: 'LinkedIn', value: 'LinkedIn' },
+    { label: 'Cold Call', value: 'Cold Call' },
+    { label: 'Email Campaign', value: 'Email Campaign' },
+    { label: 'Google Ads', value: 'Google Ads' },
+    { label: 'Event', value: 'Event' },
 ];
 
 const TAG_OPTIONS = [
@@ -128,6 +138,11 @@ export const CRMForm: React.FC<CRMFormProps> = ({ isOpen, onClose, onSubmit, ini
       } else {
           setFormData(prev => ({ ...prev, work: [...cleanWork, workLabel] }));
       }
+  };
+
+  const updateLeadSource = (source: string) => {
+      // Treating leadSources as a single value for the UI input, wrapped in array for data model
+      setFormData(prev => ({ ...prev, leadSources: [source] }));
   };
 
   const updateSocials = (key: keyof SocialLinks, value: string) => {
@@ -241,6 +256,14 @@ export const CRMForm: React.FC<CRMFormProps> = ({ isOpen, onClose, onSubmit, ini
                     </h3>
                     <div className="space-y-4">
                         <div>
+                            <p className="text-xs font-medium text-gray-500 mb-2">Lead Source</p>
+                            {formData.leadSources && formData.leadSources.length > 0 ? (
+                                <span className="px-2.5 py-1 text-xs font-bold rounded-lg bg-gray-100 text-gray-700 border border-gray-200 inline-block">
+                                    {formData.leadSources[0]}
+                                </span>
+                            ) : <span className="text-gray-400 text-xs">-</span>}
+                        </div>
+                        <div>
                             <p className="text-xs font-medium text-gray-500 mb-2">Work Type</p>
                             <div className="flex flex-wrap gap-1.5">
                                 {(formData.work || []).map((w: any) => {
@@ -329,7 +352,14 @@ export const CRMForm: React.FC<CRMFormProps> = ({ isOpen, onClose, onSubmit, ini
         {/* Pipeline Info */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 bg-gray-50 p-4 rounded-xl border border-gray-200">
             <div className="col-span-1">
-                <CustomSelect label="Status" value={formData.status || 'lead'} onChange={(val) => setFormData({...formData, status: val as CRMStatus})} options={STATUS_OPTIONS} />
+                <CustomSelect 
+                    label="Status" 
+                    value={formData.status || 'lead'} 
+                    onChange={(val) => setFormData({...formData, status: val as CRMStatus})} 
+                    options={STATUS_OPTIONS}
+                    allowCustom={true} 
+                    placeholder="Select or type..."
+                />
             </div>
             <div className="col-span-1">
                 <UserSelect 
@@ -354,7 +384,17 @@ export const CRMForm: React.FC<CRMFormProps> = ({ isOpen, onClose, onSubmit, ini
         </div>
 
         {/* Classification Tags */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div>
+                <CustomSelect 
+                    label="Lead Source"
+                    value={formData.leadSources && formData.leadSources.length > 0 ? formData.leadSources[0] : ''}
+                    onChange={(val) => updateLeadSource(val)}
+                    options={SOURCE_OPTIONS}
+                    allowCustom={true}
+                    placeholder="Select or type source..."
+                />
+            </div>
             <div>
                 <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Work Type</label>
                 <div className="flex flex-wrap gap-2">

@@ -1,6 +1,6 @@
 
 import axios from 'axios';
-import { CRMEntry, Task, Meeting, AuthResponse, User } from '../types';
+import { CRMEntry, Task, Meeting, AuthResponse, User, ForgotPasswordRequest, VerifyOtpRequest, ChangePasswordRequest, UpdatePasswordRequest, ApiResponse } from '../types';
 
 // ============================================================================
 // ⚙️ API CONFIGURATION
@@ -287,6 +287,34 @@ export const authApi = {
   login: async (email: string, password: string): Promise<AuthResponse> => {
     try {
         const res = await api.post("/auth/login", { email, password });
+        return res.data;
+    } catch (error) { throw handleApiError(error); }
+  },
+
+  forgotPassword: async (data: ForgotPasswordRequest): Promise<ApiResponse> => {
+    try {
+        const res = await api.post("/auth/forgot-password", data);
+        return res.data;
+    } catch (error) { throw handleApiError(error); }
+  },
+
+  verifyOtp: async (data: VerifyOtpRequest): Promise<ApiResponse> => {
+    try {
+        const res = await api.post("/auth/verify-otp", data);
+        return res.data;
+    } catch (error) { throw handleApiError(error); }
+  },
+
+  changePassword: async (data: ChangePasswordRequest): Promise<ApiResponse> => {
+    try {
+        const res = await api.post("/auth/change-password", data);
+        return res.data;
+    } catch (error) { throw handleApiError(error); }
+  },
+
+  updatePassword: async (data: UpdatePasswordRequest): Promise<ApiResponse> => {
+    try {
+        const res = await api.post("/auth/update-password", data);
         return res.data;
     } catch (error) { throw handleApiError(error); }
   }

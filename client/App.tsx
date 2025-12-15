@@ -20,6 +20,7 @@ import { GamePage } from './pages/GamePage';
 import { ProfilePage } from './pages/ProfilePage';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { UnauthorizedPage } from './pages/UnauthorizedPage';
+import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
 
 // --- Session Monitor Component ---
 const SessionMonitor: React.FC = () => {
@@ -103,7 +104,7 @@ const ClientRoute: React.FC<{ children: React.ReactElement }> = ({ children }) =
     return children;
 };
 
-// 5. Public Route
+// 5. Public Route (Redirects to dashboard if already logged in)
 const PublicRoute: React.FC<{ children: React.ReactElement }> = ({ children }) => {
     const { isAuthenticated, user } = useAuth();
     if (isAuthenticated) {
@@ -134,9 +135,16 @@ const AppRoutes = () => {
         <>
             <SessionMonitor />
             <Routes>
+                {/* Public Routes */}
                 <Route path="/login" element={
                     <PublicRoute>
                         <LoginPage />
+                    </PublicRoute>
+                } />
+
+                <Route path="/forgot-password" element={
+                    <PublicRoute>
+                        <ForgotPasswordPage />
                     </PublicRoute>
                 } />
                 
@@ -222,7 +230,7 @@ const AppRoutes = () => {
                 {/* System Routes */}
                 <Route path="/unauthorized" element={<UnauthorizedPage />} />
 
-                {/* Catch All */}
+                {/* Catch All - Order Matters */}
                 <Route path="/" element={<RootRedirect />} />
                 <Route path="*" element={<NotFoundPage />} />
             </Routes>

@@ -14,6 +14,10 @@ import com.incial.crm.entity.User;
 import com.incial.crm.repository.UserRepository;
 import com.incial.crm.security.JwtUtil;
 import lombok.RequiredArgsConstructor;
+import com.incial.crm.dto.ForgotPasswordRequest;
+import com.incial.crm.dto.VerifyOtpRequest;
+import com.incial.crm.dto.ChangePasswordRequest;
+import com.incial.crm.dto.ApiResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -21,6 +25,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -34,6 +39,7 @@ public class AuthService {
     private final JwtUtil jwtUtil;
     private final AuthenticationManager authenticationManager;
     private final PasswordEncoder passwordEncoder;
+    private final OtpService otpService;
 
     @Value("${google.client.id:}")
     private String googleClientId;
@@ -194,5 +200,66 @@ public class AuthService {
             throw new RuntimeException("Google authentication failed. Please try again.");
         }
     }
+
+    public ApiResponse forgotPassword(ForgotPasswordRequest request) {
+        // Check if user exists
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new UsernameNotFoundException("User with email " + request.getEmail() + " not found"));
+
+        // Generate and send OTP
+        otpService.generateAndSendOtp(request.getEmail());
+
+        return ApiResponse.builder()
+                .statusCode(200)
+                .message("OTP sent to your email. Please check your inbox.")
+                .build();
+    }
+
+    public ApiResponse verifyOtp(VerifyOtpRequest request) {
+        // Verify OTP
+        boolean isValid = otpService.verifyOtp(request.getEmail(), request.getOtp());
+
+        if (!isValid) {
+            throw new RuntimeException("Invalid or expired OTP");
+        }
+
+        return ApiResponse.builder()
+                .statusCode(200)
+                .message("OTP verified successfully")
+                .build();
+    }
+
+    @Transactional
+    public ApiResponse changePassword(ChangePasswordRequest request) {
+
+        // 1. Verify OTP (must be transactional)
+        boolean isValid = otpService.verifyOtp(
+                request.getEmail(),
+                request.getOtp()
+        );
+
+        if (!isValid) {
+            throw new RuntimeException("Invalid or expired OTP");
+        }
+
+        // 2. Fetch user
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+        // 3. Update password
+        user.setPasswordHash(
+                passwordEncoder.encode(request.getNewPassword())
+        );
+        // no save needed if User is managed, but save is fine
+        userRepository.save(user);
+
+
+
+        return ApiResponse.builder()
+                .statusCode(200)
+                .message("Password changed successfully")
+                .build();
+    }
+
 
 }

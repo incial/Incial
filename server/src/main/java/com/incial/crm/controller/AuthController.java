@@ -4,6 +4,10 @@ import com.incial.crm.dto.LoginRequest;
 import com.incial.crm.dto.LoginResponse;
 import com.incial.crm.dto.RegisterRequest;
 import com.incial.crm.dto.RegisterResponse;
+import com.incial.crm.dto.ForgotPasswordRequest;
+import com.incial.crm.dto.VerifyOtpRequest;
+import com.incial.crm.dto.ChangePasswordRequest;
+import com.incial.crm.dto.ApiResponse;
 import com.incial.crm.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -34,6 +38,24 @@ public class AuthController {
     @PostMapping("/google-login")
     public ResponseEntity<LoginResponse> googleLogin(@Valid @RequestBody com.incial.crm.dto.GoogleLoginRequest request) {
         LoginResponse response = authService.loginWithGoogle(request);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<ApiResponse> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
+        ApiResponse response = authService.forgotPassword(request);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/verify-otp")
+    public ResponseEntity<ApiResponse> verifyOtp(@Valid @RequestBody VerifyOtpRequest request) {
+        ApiResponse response = authService.verifyOtp(request);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/change-password")
+    public ResponseEntity<ApiResponse> changePassword(@Valid @RequestBody ChangePasswordRequest request) {
+        ApiResponse response = authService.changePassword(request);
         return ResponseEntity.ok(response);
     }
 }

@@ -22,6 +22,31 @@ export interface AuthResponse {
   message: string;
 }
 
+export interface ApiResponse {
+  success: boolean;
+  message: string;
+}
+
+export interface ForgotPasswordRequest {
+  email: string;
+}
+
+export interface VerifyOtpRequest {
+  email: string;
+  otp: string;
+}
+
+export interface ChangePasswordRequest {
+  email: string;
+  newPassword: string; 
+  otp: string; 
+}
+
+export interface UpdatePasswordRequest {
+  currentPassword: string;
+  newPassword: string;
+}
+
 export interface SocialLinks {
   linkedin?: string;
   instagram?: string;

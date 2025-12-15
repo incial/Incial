@@ -1,12 +1,14 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Navbar } from '../components/layout/Navbar';
 import { Sidebar } from '../components/layout/Sidebar';
 import { useAuth } from '../context/AuthContext';
-import { User, Mail, ShieldCheck, MapPin, Calendar } from 'lucide-react';
+import { User, Mail, ShieldCheck, MapPin, Calendar, Lock } from 'lucide-react';
+import { ChangePasswordModal } from '../components/profile/ChangePasswordModal';
 
 export const ProfilePage: React.FC = () => {
     const { user } = useAuth();
+    const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
 
     return (
         <div className="flex min-h-screen bg-[#F8FAFC]">
@@ -101,7 +103,9 @@ export const ProfilePage: React.FC = () => {
                                         <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
                                             <div className="mb-6">
                                                 <div className="relative z-10 flex items-center gap-3 text-2xl font-bold tracking-tight text-gray-900">
-                                                    <img src="/logo.png" alt="Incial" className="h-10 w-10 rounded-xl bg-white shadow-lg object-contain p-1" />
+                                                    <div className="h-10 w-10 rounded-xl bg-brand-600 flex items-center justify-center text-white shadow-md">
+                                                        <ShieldCheck className="h-6 w-6" />
+                                                    </div>
                                                     Incial
                                                 </div>
                                                 <p className="text-xs text-gray-500 mt-1 ml-[3.25rem] font-medium">Workspace</p>
@@ -120,9 +124,14 @@ export const ProfilePage: React.FC = () => {
                                         </div>
 
                                         <div className="bg-brand-50 rounded-2xl p-6 border border-brand-100">
-                                            <h4 className="font-bold text-brand-900 mb-2">Security Status</h4>
-                                            <p className="text-sm text-brand-700 mb-4">Your account is secured with standard authentication.</p>
-                                            <button className="px-4 py-2 bg-white text-brand-700 text-sm font-bold rounded-xl shadow-sm border border-brand-200 hover:bg-brand-50 transition-colors">
+                                            <h4 className="font-bold text-brand-900 mb-2 flex items-center gap-2">
+                                                <Lock className="h-4 w-4" /> Security
+                                            </h4>
+                                            <p className="text-sm text-brand-700 mb-4">Manage your account security settings.</p>
+                                            <button 
+                                                onClick={() => setIsPasswordModalOpen(true)}
+                                                className="px-4 py-2 bg-white text-brand-700 text-sm font-bold rounded-xl shadow-sm border border-brand-200 hover:bg-brand-50 transition-colors"
+                                            >
                                                 Change Password
                                             </button>
                                         </div>
@@ -135,6 +144,11 @@ export const ProfilePage: React.FC = () => {
                     </div>
                 </main>
             </div>
+
+            <ChangePasswordModal 
+                isOpen={isPasswordModalOpen} 
+                onClose={() => setIsPasswordModalOpen(false)} 
+            />
         </div>
     );
 };
