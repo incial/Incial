@@ -5,8 +5,8 @@ import { Sidebar } from '../components/layout/Sidebar';
 import { PieChart, BarChart, TrendingUp, Lock, Download, FileText, CheckSquare, Users, DollarSign, Layers, ArrowUpRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
-import { crmApi } from '../services/api';
-import { formatMoney } from '../utils';
+import { crmApi, tasksApi, usersApi } from '../services/api';
+import { formatMoney, exportToCSV } from '../utils';
 import { CRMEntry } from '../types';
 
 interface AnalyticsPageProps {
@@ -41,8 +41,77 @@ export const AnalyticsPage: React.FC<AnalyticsPageProps> = ({ title }) => {
 
     const handleExport = async (type: 'crm' | 'tasks' | 'performance') => {
         showToast(`Generating ${type.toUpperCase()} CSV...`, 'info');
-        // Mock success for UI demo
-        setTimeout(() => showToast("Export downloaded successfully.", 'success'), 1000);
+        
+        try {
+            let dataToExport: any[] = [];
+            const timestamp = new Date().toISOString().split('T')[0];
+
+            if (type === 'crm') {
+                dataToExport = entries.map(e => ({
+                    ID: e.id,
+                    Company: e.company,
+                    Contact: e.contactName,
+                    Email: e.email || '',
+                    Phone: e.phone || '',
+                    Status: e.status,
+                    Value: e.dealValue,
+                    AssignedTo: e.assignedTo || '',
+                    LastContact: e.lastContact || '',
+                    NextFollowUp: e.nextFollowUp || '',
+                    Source: e.leadSources?.join(', ') || ''
+                }));
+            } else if (type === 'tasks') {
+                const tasks = await tasksApi.getAll();
+                // Create company map for readable Client names
+                const companyMap: Record<number, string> = {};
+                entries.forEach(c => companyMap[c.id] = c.company);
+
+                dataToExport = tasks.map(t => ({
+                    ID: t.id,
+                    Title: t.title,
+                    Status: t.status,
+                    Priority: t.priority,
+                    AssignedTo: t.assignedTo,
+                    DueDate: t.dueDate,
+                    Client: (t.companyId && companyMap[t.companyId]) ? companyMap[t.companyId] : (t.companyId ? `ID: ${t.companyId}` : 'Internal'),
+                    Created: t.createdAt
+                }));
+            } else if (type === 'performance') {
+                const [tasks, users] = await Promise.all([tasksApi.getAll(), usersApi.getAll()]);
+                const statsMap: Record<string, any> = {};
+                
+                // Initialize with all users
+                users.forEach(u => {
+                    statsMap[u.name] = { Name: u.name, Role: u.role, Total: 0, Completed: 0, Pending: 0 };
+                });
+
+                // Aggregate task stats
+                tasks.forEach(t => {
+                    const assignee = t.assignedTo || 'Unassigned';
+                    if (!statsMap[assignee]) statsMap[assignee] = { Name: assignee, Role: 'External', Total: 0, Completed: 0, Pending: 0 };
+                    
+                    statsMap[assignee].Total++;
+                    if (['Completed', 'Done'].includes(t.status)) statsMap[assignee].Completed++;
+                    else statsMap[assignee].Pending++;
+                });
+
+                dataToExport = Object.values(statsMap).map((s: any) => ({
+                    ...s,
+                    CompletionRate: s.Total > 0 ? ((s.Completed / s.Total) * 100).toFixed(1) + '%' : '0%'
+                }));
+            }
+
+            if (dataToExport.length > 0) {
+                exportToCSV(dataToExport, `incial-${type}-export-${timestamp}`);
+                showToast("Export downloaded successfully.", 'success');
+            } else {
+                showToast("No data available to export.", 'info');
+            }
+
+        } catch (error) {
+            console.error(error);
+            showToast("Failed to export data.", 'error');
+        }
     };
 
     if (!hasPermission) {
@@ -62,7 +131,6 @@ export const AnalyticsPage: React.FC<AnalyticsPageProps> = ({ title }) => {
     const totalRevenue = entries.reduce((acc, curr) => acc + (curr.dealValue || 0), 0);
     
     // Include both 'onboarded' (active clients) and 'completed' (finished projects) as Won Deals
-    // Using toLowerCase() to ensure case-insensitivity
     const wonDeals = entries.filter(e => {
         const s = e.status?.toLowerCase() || '';
         return s === 'onboarded' || s === 'completed';
@@ -81,7 +149,6 @@ export const AnalyticsPage: React.FC<AnalyticsPageProps> = ({ title }) => {
 
     const statusCounts: Record<string, number> = {};
     entries.forEach(e => {
-        // Normalize status for counting
         const status = e.status ? e.status.toLowerCase() : 'unknown';
         statusCounts[status] = (statusCounts[status] || 0) + 1;
     });

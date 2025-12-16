@@ -79,7 +79,8 @@ export const getStatusStyles = (status: string) => {
     case 'on progress': return 'bg-yellow-100 text-yellow-700 border-yellow-200';
     case 'quote sent': return 'bg-blue-100 text-blue-700 border-blue-200';
     case 'lead': return 'bg-gray-100 text-gray-700 border-gray-200';
-    default: return 'bg-gray-50 text-gray-600 border-gray-200';
+    // Default fallback for custom statuses
+    default: return 'bg-slate-100 text-slate-700 border-slate-200';
   }
 };
 
@@ -100,7 +101,8 @@ export const getCompanyStatusStyles = (status: string) => {
     case 'quote sent': return 'bg-sky-100 text-sky-700 ring-sky-600/20';
     case 'lead': return 'bg-slate-100 text-slate-700 ring-slate-600/20';
 
-    default: return 'bg-gray-100 text-gray-600 ring-gray-500/10';
+    // Fallback for custom
+    default: return 'bg-slate-50 text-slate-600 ring-slate-500/10';
   }
 };
 
@@ -123,16 +125,16 @@ export const getWorkTypeStyles = (work: string) => {
 // --- TASKS MODULE UTILS ---
 
 export const getTaskStatusStyles = (status: string) => {
-  switch (status) {
-    case 'Completed': 
-    case 'Done': return 'bg-green-100 text-green-700 border-green-200';
-    case 'Posted': return 'bg-sky-100 text-sky-700 border-sky-200';
-    case 'In Review': return 'bg-purple-100 text-purple-700 border-purple-200';
-    case 'In Progress': return 'bg-blue-100 text-blue-700 border-blue-200';
-    case 'Dropped': return 'bg-red-100 text-red-700 border-red-200';
-    case 'Not Started': return 'bg-gray-100 text-gray-700 border-gray-200';
-    default: return 'bg-gray-50 text-gray-600 border-gray-200';
-  }
+  const lowerStatus = status?.toLowerCase();
+  if (lowerStatus === 'completed' || lowerStatus === 'done') return 'bg-green-100 text-green-700 border-green-200';
+  if (lowerStatus === 'posted') return 'bg-sky-100 text-sky-700 border-sky-200';
+  if (lowerStatus === 'in review') return 'bg-purple-100 text-purple-700 border-purple-200';
+  if (lowerStatus === 'in progress') return 'bg-blue-100 text-blue-700 border-blue-200';
+  if (lowerStatus === 'dropped') return 'bg-red-100 text-red-700 border-red-200';
+  if (lowerStatus === 'not started') return 'bg-gray-100 text-gray-700 border-gray-200';
+  
+  // Custom fallback
+  return 'bg-slate-100 text-slate-700 border-slate-200';
 };
 
 export const getTaskPriorityStyles = (priority: string) => {
@@ -152,7 +154,7 @@ export const getMeetingStatusStyles = (status: string) => {
       case 'Cancelled': return 'bg-red-100 text-red-700 border-red-200';
       case 'Postponed': return 'bg-amber-100 text-amber-700 border-amber-200';
       case 'Scheduled': return 'bg-blue-100 text-blue-700 border-blue-200';
-      default: return 'bg-gray-100 text-gray-700 border-gray-200';
+      default: return 'bg-slate-100 text-slate-700 border-slate-200';
   }
 };
 
@@ -165,4 +167,43 @@ export const isRecentlyUpdated = (dateString?: string, seconds: number = 10): bo
     // Check diff in seconds
     const diff = (now.getTime() - date.getTime()) / 1000;
     return diff < seconds;
+};
+
+export const exportToCSV = (data: any[], filename: string) => {
+  if (!data || !data.length) return;
+
+  // Get headers from the first object
+  const headers = Object.keys(data[0]);
+  
+  // Convert to CSV string
+  const csvContent = [
+    headers.join(','), // Header row
+    ...data.map(row => 
+      headers.map(fieldName => {
+        let value = row[fieldName];
+        // Handle null/undefined
+        if (value === null || value === undefined) value = '';
+        // Handle strings with commas or newlines, arrays, objects
+        if (typeof value === 'string') {
+            value = `"${value.replace(/"/g, '""')}"`; // Escape quotes
+        } else if (Array.isArray(value)) {
+            value = `"${value.join('; ')}"`;
+        } else if (typeof value === 'object' && value !== null) {
+            value = `"${JSON.stringify(value).replace(/"/g, '""')}"`;
+        }
+        return value;
+      }).join(',')
+    )
+  ].join('\n');
+
+  // Create blob and download link
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.setAttribute('href', url);
+  link.setAttribute('download', `${filename}.csv`);
+  link.style.visibility = 'hidden';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
 };
