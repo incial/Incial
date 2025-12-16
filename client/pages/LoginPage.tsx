@@ -32,7 +32,7 @@ export const LoginPage: React.FC = () => {
     const isGsiInitializedRef = useRef(false);
 
     // Safe access to env variable or fallback
-    const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+    const GOOGLE_CLIENT_ID = import.meta.env?.VITE_GOOGLE_CLIENT_ID ;
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -159,8 +159,10 @@ export const LoginPage: React.FC = () => {
                 {/* Logo Area */}
                 <div className="relative z-10">
                     <div className="flex items-center gap-3 font-bold text-2xl tracking-tight text-white">
-                        <img src="/logo.png" alt="Incial" className="h-10 w-10 rounded-xl bg-white shadow-lg object-contain p-1" />
-                        Incial
+                        <div className="relative z-10 flex items-center gap-3 text-2xl font-bold tracking-tight">
+                            <img src="/logo.png" alt="Incial" className="h-10 w-10 rounded-xl bg-white shadow-lg object-contain p-1" />
+                            Incial
+                        </div>
                     </div>
                 </div>
 
@@ -209,9 +211,13 @@ export const LoginPage: React.FC = () => {
                 <div className="w-full max-w-[400px] flex flex-col">
 
                     {/* Logo Area (Mobile/Right Panel) */}
-                    <div className="lg:hidden flex items-center gap-3 mb-10 font-bold text-2xl tracking-tight text-gray-900">
-                        <img src="/logo.png" alt="Incial" className="h-10 w-10 rounded-xl bg-white shadow-lg object-contain p-1 border border-gray-100" />
-                        Incial
+                    <div className="lg:hidden mb-10 relative z-10">
+                        <div className="flex items-center gap-3 font-bold text-2xl tracking-tight text-gray-900">
+                            <div className="relative z-10 flex items-center gap-3 text-2xl font-bold tracking-tight">
+                                <img src="/logo.png" alt="Incial" className="h-10 w-10 rounded-xl bg-white shadow-lg object-contain p-1 border border-gray-100" />
+                                Incial
+                            </div>
+                        </div>
                     </div>
 
                     <div className="mb-10">
