@@ -78,10 +78,10 @@ export const CreateUserModal: React.FC<CreateUserModalProps> = ({ isOpen, onClos
 
   return (
     <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200" onClick={onClose}>
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col transform transition-all scale-100" onClick={(e) => e.stopPropagation()}>
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg flex flex-col transform transition-all scale-100" onClick={(e) => e.stopPropagation()}>
         
         {/* Header */}
-        <div className="flex items-center justify-between p-5 border-b border-gray-100 bg-gray-50/50">
+        <div className="flex items-center justify-between p-5 border-b border-gray-100 bg-gray-50/50 rounded-t-2xl">
             <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
                 <User className="h-5 w-5 text-brand-600" /> Create New User
             </h2>
@@ -91,7 +91,7 @@ export const CreateUserModal: React.FC<CreateUserModalProps> = ({ isOpen, onClos
         </div>
 
         {/* Content */}
-        <div className="p-6">
+        <div className="p-6 overflow-visible">
             <form onSubmit={handleSubmit} className="space-y-5">
                 
                 {/* Name */}
@@ -143,8 +143,8 @@ export const CreateUserModal: React.FC<CreateUserModalProps> = ({ isOpen, onClos
                     </div>
                 </div>
 
-                {/* Role */}
-                <div>
+                {/* Role Selection - Core fix point */}
+                <div className="relative z-50">
                     <CustomSelect 
                         label="System Role"
                         value={formData.role}
@@ -156,7 +156,7 @@ export const CreateUserModal: React.FC<CreateUserModalProps> = ({ isOpen, onClos
 
                 {/* Client Link (Conditional) */}
                 {formData.role === 'ROLE_CLIENT' && (
-                    <div className="animate-in slide-in-from-top-2 duration-300">
+                    <div className="animate-in slide-in-from-top-2 duration-300 relative z-40">
                         <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5 flex items-center gap-2">
                             <Building className="h-3.5 w-3.5" /> Link to Company <span className="text-red-500">*</span>
                         </label>
@@ -182,7 +182,7 @@ export const CreateUserModal: React.FC<CreateUserModalProps> = ({ isOpen, onClos
                     <button 
                         type="submit" 
                         disabled={isLoading}
-                        className="px-5 py-2.5 text-white bg-brand-600 hover:bg-brand-700 rounded-xl font-medium shadow-lg shadow-brand-500/20 flex items-center gap-2 transition-colors disabled:opacity-70"
+                        className="px-5 py-2.5 text-white bg-brand-600 hover:bg-brand-700 rounded-xl font-medium shadow-lg shadow-brand-500/30 flex items-center gap-2 transition-all active:scale-95 disabled:opacity-70"
                     >
                         {isLoading ? (
                             <span className="flex items-center gap-2">Creating...</span>
