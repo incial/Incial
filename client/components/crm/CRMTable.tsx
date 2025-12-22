@@ -1,8 +1,7 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { CRMEntry, CRMStatus } from '../../types';
 import { getStatusStyles, formatDate, getFollowUpColor } from '../../utils';
-import { Phone, Mail, Eye, Trash2, MoreHorizontal, ChevronDown, Check, User, Calendar } from 'lucide-react';
+import { Phone, Mail, Eye, Trash2, MoreHorizontal, ChevronDown, Check, User, Calendar, Building } from 'lucide-react';
 
 interface CRMTableProps {
   data: CRMEntry[];
@@ -12,29 +11,33 @@ interface CRMTableProps {
   onStatusChange: (entry: CRMEntry, newStatus: CRMStatus) => void;
 }
 
-const AvatarPlaceholder = ({ name }: { name?: string }) => {
-    const safeName = name || 'Unknown';
-    const initials = safeName
-        .split(' ')
-        .map(n => n[0])
-        .slice(0, 2)
-        .join('')
-        .toUpperCase();
-    
-    // Gradient backgrounds for a premium feel
-    const gradients = [
-        'from-blue-100 to-blue-50 text-blue-600',
-        'from-indigo-100 to-indigo-50 text-indigo-600',
-        'from-emerald-100 to-emerald-50 text-emerald-600',
-        'from-amber-100 to-amber-50 text-amber-600',
-        'from-rose-100 to-rose-50 text-rose-600',
-        'from-violet-100 to-violet-50 text-violet-600'
-    ];
-    const colorClass = gradients[safeName.length % gradients.length];
+const AvatarPlaceholder = ({ company, imageUrl }: { company?: string; imageUrl?: string }) => {
+    const safeCompany = company || 'Unknown';
+    const fallbackText = safeCompany.charAt(0).toUpperCase();
 
     return (
-        <div className={`h-10 w-10 rounded-xl bg-gradient-to-br ${colorClass} flex items-center justify-center text-xs font-bold shadow-sm border border-white/50`}>
-            {initials}
+        <div className="h-10 w-10 rounded-xl bg-white border border-gray-200 flex items-center justify-center overflow-hidden shadow-sm flex-shrink-0 relative group/avatar">
+            {imageUrl ? (
+                <>
+                    <img 
+                        src={imageUrl} 
+                        alt={safeCompany} 
+                        className="h-full w-full object-cover transition-transform group-hover/avatar:scale-110" 
+                        onError={(e) => {
+                            e.currentTarget.style.display = 'none';
+                            const fallback = e.currentTarget.nextElementSibling as HTMLElement;
+                            if (fallback) fallback.classList.remove('hidden');
+                        }} 
+                    />
+                    <div className="hidden h-full w-full flex items-center justify-center text-xs font-black text-gray-400 bg-gray-50">
+                        {fallbackText}
+                    </div>
+                </>
+            ) : (
+                <div className="h-full w-full flex items-center justify-center text-xs font-black text-gray-400 bg-gray-50">
+                    {fallbackText}
+                </div>
+            )}
         </div>
     );
 };
@@ -138,17 +141,15 @@ export const CRMTable: React.FC<CRMTableProps> = ({ data, isLoading, onView, onD
         <tbody className="divide-y divide-gray-50">
           {data.map((row) => (
             <tr key={row.id} className="group hover:bg-slate-50/50 transition-colors duration-200">
-              {/* Name & Company - Sticky Column */}
               <td className="px-6 py-4 sticky left-0 bg-white group-hover:bg-slate-50/50 transition-colors border-r border-transparent group-hover:border-gray-100 z-10">
                 <div className="flex items-center gap-4">
-                  <AvatarPlaceholder name={row.contactName} />
+                  <AvatarPlaceholder company={row.company} imageUrl={row.companyImageUrl} />
                   <div className="flex flex-col min-w-0">
                     <button onClick={() => onView(row)} className="font-bold text-gray-900 text-sm group-hover:text-brand-600 transition-colors text-left truncate">
                         {row.contactName || 'No Name'}
                     </button>
                     <span className="text-xs font-medium text-gray-500 truncate max-w-[140px]">{row.company || 'No Company'}</span>
                     
-                    {/* Hover Quick Actions */}
                     <div className="flex gap-2 mt-1.5 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-1 group-hover:translate-y-0">
                         <a href={`tel:${row.phone}`} className="p-1 rounded-md hover:bg-brand-50 text-gray-400 hover:text-brand-600 transition-colors" title={row.phone}><Phone className="h-3 w-3" /></a>
                         <a href={`mailto:${row.email}`} className="p-1 rounded-md hover:bg-brand-50 text-gray-400 hover:text-brand-600 transition-colors" title={row.email}><Mail className="h-3 w-3" /></a>
@@ -157,7 +158,6 @@ export const CRMTable: React.FC<CRMTableProps> = ({ data, isLoading, onView, onD
                 </div>
               </td>
 
-              {/* Lead Source */}
               <td className="px-6 py-4">
                 {row.leadSources && row.leadSources.length > 0 ? (
                   <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-bold bg-gray-50 text-gray-600 border border-gray-200">
@@ -168,16 +168,15 @@ export const CRMTable: React.FC<CRMTableProps> = ({ data, isLoading, onView, onD
                 )}
               </td>
 
-              {/* Status */}
               <td className="px-6 py-4">
                 <StatusDropdown entry={row} onStatusChange={onStatusChange} />
               </td>
 
-              {/* Work Type (Tags) */}
               <td className="px-6 py-4">
                  <div className="flex flex-wrap gap-1.5 max-w-[200px]">
                     {(row.work || []).slice(0, 2).map((w: any) => {
                          const label = typeof w === 'object' ? w.name : w;
+                         if (!label) return null;
                          return (
                             <span key={label} className="px-2 py-1 bg-blue-50 text-blue-700 text-[10px] font-bold rounded-md border border-blue-100/50 uppercase tracking-tight">{label}</span>
                          );
@@ -189,7 +188,6 @@ export const CRMTable: React.FC<CRMTableProps> = ({ data, isLoading, onView, onD
                  </div>
               </td>
 
-              {/* Follow Up */}
               <td className="px-6 py-4">
                 <div className="flex items-center gap-2">
                     <div className={`p-1.5 rounded-lg ${getFollowUpColor(row.nextFollowUp).includes('red') ? 'bg-red-50 text-red-600' : 'bg-gray-50 text-gray-400'}`}>
@@ -204,7 +202,6 @@ export const CRMTable: React.FC<CRMTableProps> = ({ data, isLoading, onView, onD
                 </div>
               </td>
 
-              {/* Assigned */}
               <td className="px-6 py-4">
                 <div className="flex items-center gap-2">
                     <div className="h-6 w-6 rounded-lg bg-gradient-to-tr from-gray-100 to-gray-50 text-[10px] flex items-center justify-center text-gray-600 font-bold border border-gray-200 shadow-sm">
@@ -214,21 +211,12 @@ export const CRMTable: React.FC<CRMTableProps> = ({ data, isLoading, onView, onD
                 </div>
               </td>
 
-              {/* Actions */}
               <td className="px-6 py-4 text-right">
                 <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-all duration-200 translate-x-2 group-hover:translate-x-0">
-                    <button 
-                        onClick={() => onView(row)} 
-                        className="p-2 text-gray-400 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition-colors"
-                        title="View Details"
-                    >
+                    <button onClick={() => onView(row)} className="p-2 text-gray-400 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition-colors" title="View Details">
                         <Eye className="h-4 w-4" />
                     </button>
-                    <button 
-                        onClick={() => onDelete(row.id)} 
-                        className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                        title="Delete"
-                    >
+                    <button onClick={() => onDelete(row.id)} className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Delete">
                         <Trash2 className="h-4 w-4" />
                     </button>
                 </div>

@@ -135,7 +135,7 @@ export const CRMForm: React.FC<CRMFormProps> = ({ isOpen, onClose, onSubmit, ini
       const currentWork = formData.work || [];
       const cleanWork = currentWork.filter(Boolean).map((w: any) => (w && typeof w === 'object') ? w.name : w);
       if (!cleanWork.includes(customWork.trim())) {
-          setFormData(prev => ({ ...prev, work: [...currentWork, customWork.trim()] }));
+          setFormData(prev => ({ ...prev, work: [...cleanWork, customWork.trim()] }));
       }
       setCustomWork('');
   };
@@ -154,6 +154,7 @@ export const CRMForm: React.FC<CRMFormProps> = ({ isOpen, onClose, onSubmit, ini
       }));
   };
 
+  // --- Render View ---
   const renderView = () => (
     <div className="space-y-6">
         <div className="bg-gray-50 rounded-xl p-5 border border-gray-200">
@@ -305,6 +306,7 @@ export const CRMForm: React.FC<CRMFormProps> = ({ isOpen, onClose, onSubmit, ini
     </div>
   );
 
+  // --- Render Edit ---
   const renderEdit = () => (
     <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -401,7 +403,6 @@ export const CRMForm: React.FC<CRMFormProps> = ({ isOpen, onClose, onSubmit, ini
                 </label>
                 <div className="flex flex-wrap gap-2 mb-3">
                     {PREDEFINED_WORK.map(opt => {
-                        /* Fix: added null check for w */
                         const cleanWork = (formData.work || []).filter(Boolean).map((w: any) => (w && typeof w === 'object') ? w.name : w);
                         const isSelected = cleanWork.includes(opt);
                         return (
@@ -411,11 +412,10 @@ export const CRMForm: React.FC<CRMFormProps> = ({ isOpen, onClose, onSubmit, ini
                             </button>
                         );
                     })}
-                    {(formData.work || []).filter(Boolean).filter(w => {
+                    {(formData.work || []).filter(Boolean).filter((w: any) => {
                         const val = (w && typeof w === 'object') ? w.name : w;
                         return val && !PREDEFINED_WORK.includes(val);
-                    }).map(opt => {
-                        /* Fix: added null check for opt */
+                    }).map((opt: any) => {
                         const label = (opt && typeof opt === 'object') ? opt.name : opt;
                         if (!label) return null;
                         return (
@@ -462,9 +462,9 @@ export const CRMForm: React.FC<CRMFormProps> = ({ isOpen, onClose, onSubmit, ini
             </div>
         </div>
 
-        <div className="pt-6 border-t border-gray-100 flex justify-end gap-3">
-            <button type="button" onClick={() => initialData ? setMode('view') : onClose()} className="px-5 py-2.5 text-gray-700 bg-gray-100 rounded-lg font-bold text-sm">Cancel</button>
-            <button type="submit" className="px-5 py-2.5 text-white bg-brand-600 rounded-lg shadow-lg font-bold text-sm">Save Changes</button>
+        <div className="flex flex-wrap justify-end gap-3 pt-6 border-t border-gray-100">
+            <button type="button" onClick={() => initialData ? setMode('view') : onClose()} className="px-5 py-2.5 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors font-medium">Cancel</button>
+            <button type="submit" className="px-5 py-2.5 text-white bg-brand-600 hover:bg-brand-700 rounded-lg transition-colors font-medium flex items-center gap-2 shadow-lg shadow-brand-500/30"><Save className="h-4 w-4" /> Save Changes</button>
         </div>
     </form>
   );
