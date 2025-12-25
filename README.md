@@ -1,323 +1,100 @@
-# WorkHub - Enterprise CRM & Task Management System
+# Incial WorkHub
 
-WorkHub is a comprehensive Customer Relationship Management (CRM) and task management platform designed for modern businesses. Built with Spring Boot and React, it provides a full-featured solution for managing clients, tasks, meetings, and team collaboration.
+Incial WorkHub is a full‑stack internal operations and CRM platform built to centralize how an organization manages clients, tasks, communication, and team performance. The system is designed to replace fragmented tools such as spreadsheets, chat threads, and disconnected apps with a single, structured platform that reflects how real businesses operate.
 
-## 🌟 Features
+This is not a demo or tutorial project. Incial WorkHub is engineered around real‑world workflows, role separation, accountability, and scalability, making it suitable for actual organizational use and long‑term growth.
 
-### 🔐 Authentication & Authorization
-- **User Registration & Login**: Secure user authentication with JWT tokens
-- **Google OAuth Integration**: Single Sign-On with Google accounts
-- **Password Recovery**: Forgot password functionality with OTP verification via email
-- **Role-Based Access Control**: Three-tier permission system
-    - `SUPER_ADMIN`: Full system access and user management
-    - `ADMIN`: CRM management and team oversight
-    - `EMPLOYEE`: Personal task management and assigned work
+---
 
-### 📊 CRM Management
-- **Client Database**: Comprehensive client information management
-    - Company details with logo integration
-    - Contact information (name, email, phone, address)
-    - Deal value tracking
-    - Client status monitoring
-    - Custom metadata fields support
-- **Client Tracking**: Visual client tracker for pipeline management
-- **Client Details**: Detailed view of individual client information
-- **Client Portal**: Dedicated portal for client interactions
+## Why Incial WorkHub Exists
 
-### ✅ Task Management
-- **Task Creation & Assignment**: Create and assign tasks to team members
-- **Task Categories**:
-    - General tasks
-    - Follow-up tasks
-    - Proposal tasks
-    - Closing tasks
-- **Priority Levels**: High, Medium, Low priority classification
-- **Status Tracking**: To-Do, In Progress, Completed
-- **Due Date Management**: Calendar-based deadline tracking
-- **Attachments**: Support for task-related file attachments
-- **My Tasks View**: Personalized task dashboard for employees
-- **Company-Linked Tasks**: Associate tasks with specific clients/companies
+Many growing teams face the same operational problems: client data scattered across multiple tools, unclear task ownership, poor visibility into progress, and weak access control. As teams scale, these issues compound and lead to inefficiency, missed follow‑ups, and lack of accountability.
 
-### 📅 Meeting Management
-- **Meeting Scheduler**: Schedule and manage meetings
-- **Meeting Links**: Integration with video conferencing platforms
-- **Meeting Notes**: Add and track meeting notes
-- **Status Tracking**: Scheduled, Completed, Cancelled
-- **CRM Integration**: Link meetings to specific client entries
-- **Assignment**: Assign meetings to team members
-- **Universal Calendar**: Consolidated view of all meetings and tasks
+Incial WorkHub was created to solve these problems by providing a centralized system where data, responsibilities, and workflows are clearly defined, enforced, and visible to the right people at the right time.
 
-### 📈 Analytics & Reporting
-- **Performance Dashboard**: Real-time analytics and insights
-- **Admin Performance Tracking**: Monitor team performance metrics
-- **Task Completion Statistics**: Track completed tasks per user
-- **Deal Value Analytics**: Financial metrics and reporting
-- **Activity Monitoring**: User activity tracking and logs
+---
 
-### 👤 User Management
-- **User Profiles**: Customizable user profiles with avatars
-- **Team Directory**: View all team members
-- **Role Management**: Assign and modify user roles (Super Admin only)
-- **Performance Tracking**: Individual user statistics
+## What the Platform Does
 
-### 🎮 Productivity Features
-- **Focus Break Game**: Built-in game to promote healthy work breaks
-- **Session Monitoring**: Automatic break reminders after 15 minutes of activity
-- **Personal Dashboard**: Customized dashboard for each user role
+Incial WorkHub acts as a central operating system for internal teams. It brings together client management, task tracking, performance visibility, and secure access control into one cohesive platform.
 
-### 🔒 Security Features
-- **JWT Authentication**: Secure token-based authentication
-- **Password Encryption**: BCrypt password hashing
-- **OTP Verification**: Email-based OTP for password recovery
-- **CORS Configuration**: Configurable cross-origin resource sharing
-- **Session Management**: Secure session handling
+The system enables organizations to manage client relationships through a structured CRM pipeline, assign and track tasks with clear ownership, enforce role‑based access across the application, and gain insight into team performance through meaningful metrics. All interactions between the frontend and backend are handled through well‑defined APIs, ensuring consistency and scalability.
 
-### 📧 Email Integration
-- **Email Notifications**: SMTP email service integration
-- **OTP Delivery**: Email-based OTP for password recovery
-- **Configurable SMTP**: Support for Gmail and other SMTP providers
+---
 
-## 🛠️ Technology Stack
+## Core Capabilities
 
-### Backend
-- **Framework**: Spring Boot 3.2.0
-- **Language**: Java 17
-- **Database**:
-    - PostgreSQL (Production)
-    - H2 Database (Development/Testing)
-- **ORM**: Spring Data JPA with Hibernate
-- **Security**: Spring Security with JWT
-- **Authentication**:
-    - JWT (JSON Web Tokens)
-    - Google OAuth 2.0
-- **API Documentation**: Springdoc OpenAPI (Swagger UI)
-- **Build Tool**: Maven
-- **Email**: Spring Boot Mail with SMTP
-- **Monitoring**: Spring Boot Actuator
+### Client & CRM Management
 
-### Frontend
-- **Framework**: React 19.2.1
-- **Language**: TypeScript
-- **Build Tool**: Vite
-- **Routing**: React Router DOM v7
-- **HTTP Client**: Axios
-- **Icons**: Lucide React
-- **OAuth**: @react-oauth/google
+The CRM module allows teams to manage clients and leads with structured data instead of unorganized notes. It supports tracking deal stages, follow‑ups, tags, lead sources, and assigned team members, making it suitable for real sales and relationship workflows.
 
-### DevOps
-- **Containerization**: Docker with multi-stage builds
-- **Health Checks**: Built-in health monitoring
-- **Environment Management**: Environment variable configuration
+### Task & Workflow Tracking
 
-## 📁 Project Structure
+Tasks are treated as core entities within the system. Each task has ownership, status, and lifecycle tracking, enabling teams to understand what work is in progress, what is blocked, and what has been completed.
 
-```
-workhub/
-├── server/                          # Backend Spring Boot application
-│   ├── src/
-│   │   ├── main/
-│   │   │   ├── java/com/incial/crm/
-│   │   │   │   ├── config/          # Configuration classes
-│   │   │   │   ├── controller/      # REST API controllers
-│   │   │   │   │   ├── AuthController.java
-│   │   │   │   │   ├── UserController.java
-│   │   │   │   │   ├── CrmController.java
-│   │   │   │   │   ├── TaskController.java
-│   │   │   │   │   └── MeetingController.java
-│   │   │   │   ├── dto/             # Data Transfer Objects
-│   │   │   │   ├── entity/          # JPA Entities
-│   │   │   │   │   ├── User.java
-│   │   │   │   │   ├── CrmEntry.java
-│   │   │   │   │   ├── Task.java
-│   │   │   │   │   ├── Meeting.java
-│   │   │   │   │   └── Otp.java
-│   │   │   │   ├── exception/       # Custom exceptions
-│   │   │   │   ├── repository/      # Spring Data repositories
-│   │   │   │   ├── security/        # Security configuration
-│   │   │   │   │   ├── JwtUtil.java
-│   │   │   │   │   └── JwtAuthenticationFilter.java
-│   │   │   │   └── service/         # Business logic services
-│   │   │   │       ├── AuthService.java
-│   │   │   │       ├── UserService.java
-│   │   │   │       ├── CrmService.java
-│   │   │   │       ├── TaskService.java
-│   │   │   │       ├── MeetingService.java
-│   │   │   │       ├── EmailService.java
-│   │   │   │       └── OtpService.java
-│   │   │   └── resources/
-│   │   │       ├── application.yml
-│   │   │       └── .env.example
-│   │   └── test/                   # Unit and integration tests
-│   ├── Dockerfile                  # Docker configuration
-│   └── pom.xml                     # Maven dependencies
-│
-└── client/                         # Frontend React application
-    ├── components/                 # Reusable React components
-    │   ├── client-tracker/
-    │   ├── companies/
-    │   ├── crm/
-    │   ├── layout/
-    │   ├── meetings/
-    │   ├── tasks/
-    │   └── ui/
-    ├── context/                    # React Context providers
-    │   ├── AuthContext.tsx
-    │   ├── ToastContext.tsx
-    │   └── LayoutContext.tsx
-    ├── pages/                      # Page components
-    │   ├── LoginPage.tsx
-    │   ├── CRMPage.tsx
-    │   ├── CompaniesPage.tsx
-    │   ├── TasksPage.tsx
-    │   ├── MeetingTrackerPage.tsx
-    │   ├── ClientTrackerPage.tsx
-    │   ├── ClientDetailsPage.tsx
-    │   ├── AnalyticsPage.tsx
-    │   ├── AdminPerformancePage.tsx
-    │   ├── MyDashboardPage.tsx
-    │   ├── ClientPortalPage.tsx
-    │   ├── UniversalCalendarPage.tsx
-    │   ├── ProfilePage.tsx
-    │   └── GamePage.tsx
-    ├── services/                   # API service layer
-    ├── App.tsx                     # Main application component
-    ├── types.ts                    # TypeScript type definitions
-    ├── package.json
-    └── vite.config.ts
-```
+### Role‑Based Access Control
 
-## 📚 API Documentation
+Incial WorkHub enforces strict role separation across the platform. Super Admins, Admins, Employees, and Clients each have clearly defined permissions. Access control is implemented at the backend level, ensuring that security is not dependent on the frontend alone.
 
-### Authentication Endpoints
-- `POST /api/v1/auth/register` - Register new user
-- `POST /api/v1/auth/login` - User login
-- `POST /api/v1/auth/google-login` - Google OAuth login
-- `POST /api/v1/auth/forgot-password` - Request password reset
-- `POST /api/v1/auth/verify-otp` - Verify OTP
-- `POST /api/v1/auth/change-password` - Change password
+### Performance & Visibility
 
-### User Management
-- `GET /api/v1/users/all` - Get all users (Admin only)
-- `GET /api/v1/users/me` - Get current user profile
-- `GET /api/v1/users/{id}` - Get user by ID
+Administrative views provide insight into workload distribution and task completion trends. This allows decision‑makers to identify bottlenecks, assess productivity, and make informed operational decisions.
 
-### CRM Management
-- `GET /api/v1/crm/all` - Get all CRM entries
-- `GET /api/v1/crm/details/{id}` - Get CRM entry details
-- `POST /api/v1/crm/create` - Create new CRM entry
-- `PUT /api/v1/crm/update/{id}` - Update CRM entry
-- `DELETE /api/v1/crm/delete/{id}` - Delete CRM entry
+### Secure Authentication
 
-### Task Management
-- `GET /api/v1/tasks/all` - Get all tasks
-- `GET /api/v1/tasks/my-tasks` - Get current user's tasks
-- `POST /api/v1/tasks/create` - Create new task
-- `PUT /api/v1/tasks/update/{id}` - Update task
-- `DELETE /api/v1/tasks/delete/{id}` - Delete task
+Authentication and authorization are handled using industry‑standard security practices. Protected routes, token‑based authentication, and controlled access to sensitive operations ensure that the platform remains secure as it scales.
 
-### Meeting Management
-- `GET /api/v1/meetings/all` - Get all meetings
-- `POST /api/v1/meetings/create` - Create new meeting
-- `PUT /api/v1/meetings/update/{id}` - Update meeting
-- `DELETE /api/v1/meetings/delete/{id}` - Delete meeting
+---
 
-**Interactive API Documentation**: Access Swagger UI at http://localhost:8080/swagger-ui.html for detailed API documentation and testing.
+## Architecture Philosophy
 
-## 🔧 Configuration
+Incial WorkHub is built using a clean, production-oriented architecture that mirrors how modern backend-driven platforms are designed and deployed.
 
-### Database Configuration
-The application supports both PostgreSQL (production) and H2 (development):
+The frontend and backend are fully decoupled. The frontend is implemented as a static single-page application, while the backend exposes a structured REST API responsible for business logic, security enforcement, and data integrity. This separation allows independent scaling, deployment, and evolution of each layer.
 
-**PostgreSQL (Production)**:
-```yaml
-spring:
-  datasource:
-    url: jdbc:postgresql://localhost:5432/workhub
-    username: your_username
-    password: your_password
-    driver-class-name: org.postgresql.Driver
-```
+The backend follows layered architecture principles, ensuring clear separation between controllers, services, repositories, and domain models. Security, validation, and transactional boundaries are handled at the backend level, not delegated to the UI.
 
-### Email Configuration
-Configure SMTP settings for email notifications:
+The entire system is containerized using Docker, ensuring consistency across local development, CI pipelines, and production environments.
 
-```yaml
-spring:
-  mail:
-    host: smtp.gmail.com
-    port: 587
-    username: your_email@gmail.com
-    password: your_app_password
-    properties:
-      mail:
-        smtp:
-          auth: true
-          starttls:
-            enable: true
-```
+---
 
-**Note**: For Gmail, you need to generate an [App Password](https://support.google.com/accounts/answer/185833).
+## What Makes This Project Different
 
-### JWT Configuration
-```yaml
-jwt:
-  secret: your_secure_secret_key_minimum_64_characters
-```
+Incial WorkHub is designed and deployed as a real production system, not a classroom exercise.
 
-### Google OAuth Configuration
-```yaml
-google:
-  client:
-    id: your_google_client_id
-```
+The backend is packaged as a Docker image and deployed on AWS infrastructure, following industry-standard deployment practices. Continuous Integration and Continuous Deployment (CI/CD) pipelines automate the build, containerization, and publishing of backend images, eliminating manual deployment steps.
 
-## 🏗️ Building for Production
+An Nginx reverse proxy is used in front of the backend to handle HTTP traffic, provide clean routing, and isolate internal application ports. This setup mirrors real-world production environments where application servers are never directly exposed to the public internet.
 
-### Backend
-```bash
-cd server
-./mvnw clean package -DskipTests
-```
-The JAR file will be created at `target/backend-1.0.0.jar`
+The system demonstrates practical experience with cloud infrastructure, container orchestration at a small scale, reverse proxy configuration, and automated delivery pipelines. It reflects an understanding of how software moves from source code to a live, publicly accessible service.
 
-### Frontend
-```bash
-cd client
-npm run build
-```
-The production build will be in the `dist/` directory.
+---
 
-## 🔐 Default User Roles
+## Technical Highlights
 
-The application uses a three-tier role system:
+* Backend containerized using Docker for environment consistency
+* Deployed on AWS infrastructure with minimal-cost, production-ready configuration
+* Images stored and versioned in Amazon Elastic Container Registry (ECR)
+* Automated CI/CD pipeline builds and publishes Docker images on every main-branch commit
+* Commit-based image tagging enables deterministic deployments and rollbacks
+* Nginx configured as a reverse proxy to route traffic and manage ports securely
+* Frontend-to-backend communication handled through proxy routing to avoid CORS issues
+* Role-based security enforced at the API level
 
-1. **ROLE_SUPER_ADMIN**:
-    - Full system access
-    - User management
-    - Role assignment
-    - System configuration
+---
 
-2. **ROLE_ADMIN**:
-    - CRM management
-    - Task assignment
-    - Meeting scheduling
-    - Team oversight
-    - Analytics access
+## Intended Use Cases
 
-3. **ROLE_EMPLOYEE**:
-    - Personal task management
-    - View assigned tasks
-    - Update task status
-    - Access personal dashboard
+Incial WorkHub can be used as an internal CRM and operations platform for startups, agencies, or service‑based teams. It also serves as a strong foundation for extending features such as analytics, reporting, billing, or integrations with third‑party tools.
 
+---
 
-### Health Monitoring
-The application includes Spring Boot Actuator for health monitoring:
-- Health endpoint: `/actuator/health`
-- Info endpoint: `/actuator/info`
+## Project Status
 
-## 📄 License
+The project is under active development, with ongoing improvements focused on stability, performance, and feature depth. The architecture is designed to support future expansion without requiring fundamental rewrites.
 
-This project is licensed under the License - see the LICENSE file for details.
+---
 
+## Closing Note
 
+Incial WorkHub represents a practical, real‑world approach to building software. It prioritizes clarity, structure, security, and scalability, making it suitable for real usage rather than just demonstration. The platform is built to grow, adapt, and support meaningful operational workflows over time.
