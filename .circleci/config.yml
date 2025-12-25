@@ -22,7 +22,8 @@ jobs:
             mvn clean package -DskipTests
 
       # -----------------------------
-      # Enable Docker daemon
+      # Enable Remote Docker (amd64)
+      # Required for buildx cross-arch builds
       # -----------------------------
       - setup_remote_docker:
           docker_layer_caching: true
@@ -45,22 +46,26 @@ jobs:
               ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
 
       # -----------------------------
-      # Build & Push ARM64 Image (SINGLE IMAGE)
+      # Build & Push ARM64 Image (CROSS-ARCH)
+      # NOTE:
+      # CircleCI runs on amd64
+      # EC2 is aarch64
+      # => buildx is MANDATORY
       # -----------------------------
       - run:
           name: Build and Push ARM64 Docker Image
           command: |
             cd server
 
-            docker build \
-              --platform linux/arm64 \
-              -t ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO_NAME}:${CIRCLE_SHA1:0:7} .
+            docker buildx create --use --name arm-builder || docker buildx use arm-builder
 
-            docker push \
-              ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO_NAME}:${CIRCLE_SHA1:0:7}
+            docker buildx build \
+              --platform linux/arm64 \
+              -t ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO_NAME}:${CIRCLE_SHA1:0:7} \
+              --push .
 
       # -----------------------------
-      # Deploy to EC2 via SSM
+      # Deploy to ARM EC2 via SSM
       # -----------------------------
       - run:
           name: Deploy to EC2 via SSM
