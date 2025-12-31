@@ -96,7 +96,7 @@ export const ClientTrackerPage: React.FC = () => {
                      <div className="h-2 w-2 rounded-full bg-brand-500 animate-pulse" />
                      <span className="text-[9px] lg:text-[10px] font-black text-brand-600 uppercase tracking-[0.4em]">Operations Center</span>
                 </div>
-                <h1 className="text-3xl sm:text-4xl lg:text-7xl font-black text-slate-900 tracking-tighter leading-none display-text">Tracker.</h1>
+                <h1 className="text-4xl sm:text-5xl lg:text-7xl font-black text-slate-900 tracking-tighter leading-none display-text">Tracker.</h1>
                 <p className="text-slate-500 text-sm lg:text-lg mt-4 lg:mt-6 font-medium max-w-xl leading-relaxed">
                     Visualizing execution velocity and roadmap synchronization across all project nodes.
                 </p>
@@ -130,7 +130,7 @@ export const ClientTrackerPage: React.FC = () => {
            </div>
 
            {/* Premium Registry Table */}
-           <div className="bg-white/30 backdrop-blur-3xl rounded-[2rem] lg:rounded-[3.5rem] border border-white/60 shadow-2xl overflow-hidden flex flex-col relative">
+           <div className="bg-white/30 backdrop-blur-3xl rounded-[2rem] lg:rounded-[3.5rem] border border-white/60 shadow-2xl overflow-hidden flex flex-col relative w-full">
                 {/* Decorative background blur for table area */}
                 <div className="absolute top-0 left-0 w-full h-24 bg-gradient-to-b from-white/30 to-transparent pointer-events-none z-10" />
 

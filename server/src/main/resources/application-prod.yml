@@ -7,16 +7,18 @@ spring:
     username: ${DB_USER}
     password: ${DB_PASS}
     driver-class-name: org.postgresql.Driver
-    hikari:
-      maximum-pool-size: 10
-      minimum-idle: 2
-      connection-timeout: 30000
 
-      idle-timeout: 300000        # 5 minutes
-      max-lifetime: 1200000       # 20 minutes (must be < DB timeout)
-      keepalive-time: 300000     # 5 minutes
+    hikari:
+      maximum-pool-size: 12
+      minimum-idle: 3
+      connection-timeout: 20000
+      idle-timeout: 60000              # 1 minute
+      max-lifetime: 300000             # 5 minutes
+      keepalive-time: 30000
+      validation-timeout: 5000
 
   jpa:
+    open-in-view: false
     hibernate:
       ddl-auto: validate
     properties:
@@ -24,7 +26,6 @@ spring:
         show_sql: false
         format_sql: false
         dialect: org.hibernate.dialect.PostgreSQLDialect
-    open-in-view: false
 
   mail:
     host: smtp.gmail.com
@@ -45,11 +46,15 @@ google:
   client:
     id: ${GOOGLE_CLIENT_ID}
 
-# JWT Configuration
+# ===========================
+# JWT CONFIGURATION
+# ===========================
 jwt:
   secret: ${JWT_SECRET}
 
-# Logging Configuration for Production
+# ===========================
+# LOGGING (PRODUCTION)
+# ===========================
 logging:
   level:
     root: INFO
@@ -65,7 +70,9 @@ logging:
     max-size: 10MB
     max-history: 7
 
-# Actuator Configuration
+# ===========================
+# ACTUATOR
+# ===========================
 management:
   endpoints:
     web:
@@ -78,18 +85,29 @@ management:
     defaults:
       enabled: true
 
-# Server Configuration
+# ===========================
+# SERVER
+# ===========================
 server:
   port: ${SERVER_PORT:8080}
   compression:
     enabled: true
-    mime-types: text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json
+    mime-types: >
+      text/html,
+      text/xml,
+      text/plain,
+      text/css,
+      text/javascript,
+      application/javascript,
+      application/json
   tomcat:
     max-threads: 50
     min-spare-threads: 5
 
-# Env Printer Configuration
+# ===========================
+# ENV PRINTER
+# ===========================
 env:
   printer:
-    enabled: false
+    enabled: true
     endpoint-enabled: false
