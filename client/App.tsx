@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef } from 'react';
 import { HashRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -22,6 +23,7 @@ import { NotFoundPage } from './pages/NotFoundPage';
 import { UnauthorizedPage } from './pages/UnauthorizedPage';
 import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
 import { SettingsPage } from './pages/SettingsPage';
+import { Screensaver } from './components/ui/Screensaver';
 
 // --- Session Monitor Component ---
 const SessionMonitor: React.FC = () => {
@@ -157,6 +159,7 @@ const AppRoutes = () => {
     return (
         <>
             <SessionMonitor />
+            <Screensaver />
             <Routes>
                 {/* Public Routes */}
                 <Route path="/login" element={
@@ -286,3 +289,4 @@ const App: React.FC = () => {
 };
 
 export default App;
+    
