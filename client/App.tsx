@@ -21,13 +21,14 @@ import { ProfilePage } from './pages/ProfilePage';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { UnauthorizedPage } from './pages/UnauthorizedPage';
 import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
+import { SettingsPage } from './pages/SettingsPage';
 
 // --- Session Monitor Component ---
 const SessionMonitor: React.FC = () => {
     const { showToast } = useToast();
     const navigate = useNavigate();
     const location = useLocation();
-    const { isAuthenticated } = useAuth();
+    const { isAuthenticated, logout } = useAuth();
     const timerRef = useRef<number | null>(null);
     const hasTriggeredRef = useRef(false);
 
@@ -37,7 +38,7 @@ const SessionMonitor: React.FC = () => {
             return;
         }
 
-        // Set timer for 15 minutes (15 * 60 * 1000 ms)
+        // Focus Break Prompt (15 mins)
         timerRef.current = window.setTimeout(() => {
             if (location.pathname !== '/break' && !hasTriggeredRef.current) {
                 hasTriggeredRef.current = true;
@@ -52,10 +53,32 @@ const SessionMonitor: React.FC = () => {
             }
         }, 15 * 60 * 1000); 
 
+        // Auto Logout Check (3 hours)
+        const checkSession = () => {
+            const loginTimeStr = localStorage.getItem('loginTimestamp');
+            if (loginTimeStr) {
+                const loginTime = parseInt(loginTimeStr, 10);
+                const now = Date.now();
+                const sessionLimit = 3 * 60 * 60 * 1000; // 3 hours
+                
+                if (now - loginTime > sessionLimit) {
+                    logout();
+                    // Toast notification removed as requested
+                }
+            } else {
+                // If missing (legacy login), set it to now to start timer
+                localStorage.setItem('loginTimestamp', String(Date.now()));
+            }
+        };
+
+        const interval = setInterval(checkSession, 60 * 1000); // Check every minute
+        checkSession(); // Initial check
+
         return () => {
             if (timerRef.current) clearTimeout(timerRef.current);
+            clearInterval(interval);
         };
-    }, [isAuthenticated, showToast, navigate, location.pathname]);
+    }, [isAuthenticated, showToast, navigate, location.pathname, logout]);
 
     return null;
 };
@@ -205,6 +228,11 @@ const AppRoutes = () => {
                 <Route path="/client-tracker/:id" element={
                     <OperationalRoute>
                         <ClientDetailsPage />
+                    </OperationalRoute>
+                } />               
+                <Route path="/settings" element={
+                    <OperationalRoute>
+                        <SettingsPage />
                     </OperationalRoute>
                 } />
                 

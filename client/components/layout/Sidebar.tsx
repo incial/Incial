@@ -1,4 +1,5 @@
-import React from 'react';
+
+import React, { useRef, useLayoutEffect } from 'react';
 import { Users, Briefcase, PieChart, CheckSquare, Calendar, LayoutDashboard, Home, Shield, Zap, LogOut, X, Activity } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
@@ -50,6 +51,21 @@ export const Sidebar: React.FC = () => {
     const { isSidebarCollapsed, isMobileSidebarOpen, closeMobileSidebar } = useLayout();
     const currentPath = location.pathname;
     
+    const scrollRef = useRef<HTMLDivElement>(null);
+
+    useLayoutEffect(() => {
+        const savedScroll = sessionStorage.getItem('sidebarScroll');
+        if (savedScroll && scrollRef.current) {
+            scrollRef.current.scrollTop = Number(savedScroll);
+        }
+    }, []);
+
+    const handleScroll = () => {
+        if (scrollRef.current) {
+            sessionStorage.setItem('sidebarScroll', String(scrollRef.current.scrollTop));
+        }
+    };
+    
     const role = user?.role;
     const isSuperAdmin = role === 'ROLE_SUPER_ADMIN';
     const isAdmin = role === 'ROLE_ADMIN' || isSuperAdmin;
@@ -96,7 +112,12 @@ export const Sidebar: React.FC = () => {
                 )}
             </div>
 
-            <div className="flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar px-3 lg:px-4 space-y-8 lg:space-y-12 relative z-10" onClick={() => window.innerWidth < 1024 && closeMobileSidebar()}>
+            <div 
+                ref={scrollRef}
+                onScroll={handleScroll}
+                className="flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar px-3 lg:px-4 space-y-8 lg:space-y-12 relative z-10" 
+                onClick={() => window.innerWidth < 1024 && closeMobileSidebar()}
+            >
                 <div className="space-y-1 lg:space-y-2">
                     {!isSidebarCollapsed && (
                         <p className="px-4 lg:px-6 text-[10px] lg:text-[11px] font-black text-slate-600 uppercase tracking-[0.4em] mb-3 lg:mb-6">Core Operations</p>
