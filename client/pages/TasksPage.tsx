@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo } from 'react';
 import { Navbar } from '../components/layout/Navbar';
 import { Sidebar } from '../components/layout/Sidebar';
@@ -5,16 +6,15 @@ import { tasksApi, crmApi, usersApi } from '../services/api';
 import { Task, TaskFilterState, TaskPriority, TaskStatus } from '../types';
 import { TasksTable } from '../components/tasks/TasksTable';
 import { TasksKanban } from '../components/tasks/TasksKanban';
-import { TasksCalendar } from '../components/tasks/TasksCalendar';
 import { TasksFilter } from '../components/tasks/TasksFilter';
 import { TaskForm } from '../components/tasks/TaskForm';
 import { DeleteConfirmationModal } from '../components/ui/DeleteConfirmationModal';
-import { Plus, LayoutList, Kanban, Calendar as CalendarIcon, User, Archive, ChevronDown, ChevronRight, Activity, Target } from 'lucide-react';
+import { Plus, LayoutList, Kanban, User, Archive, ChevronDown, ChevronRight, Activity, Target } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useLayout } from '../context/LayoutContext';
 import { useToast } from '../context/ToastContext';
 
-type ViewMode = 'list' | 'kanban' | 'calendar' | 'mine';
+type ViewMode = 'list' | 'kanban' | 'mine';
 
 export const TasksPage: React.FC = () => {
   const { user } = useAuth();
@@ -183,7 +183,6 @@ export const TasksPage: React.FC = () => {
                 {[
                     { id: 'list', label: 'Milestones', icon: LayoutList },
                     { id: 'kanban', label: 'Strategic Board', icon: Kanban },
-                    { id: 'calendar', label: 'Timeline', icon: CalendarIcon },
                     { id: 'mine', label: 'My Focus', icon: User },
                 ].map((view) => (
                     <button 
@@ -200,7 +199,7 @@ export const TasksPage: React.FC = () => {
                 ))}
             </div>
 
-            {viewMode !== 'calendar' && <TasksFilter filters={filters} setFilters={setFilters} />}
+            <TasksFilter filters={filters} setFilters={setFilters} />
 
             <div className="pb-10 overflow-x-auto">
                 {isLoading ? (
@@ -217,6 +216,7 @@ export const TasksPage: React.FC = () => {
                                     companyMap={companyMap} 
                                     userAvatarMap={userAvatarMap} 
                                     onEdit={handleEdit} 
+                                    onDelete={(id) => setDeleteId(id)}
                                     onStatusChange={handleStatusChange} 
                                     onPriorityChange={handlePriorityChange} 
                                 />
@@ -241,6 +241,7 @@ export const TasksPage: React.FC = () => {
                                                     companyMap={companyMap} 
                                                     userAvatarMap={userAvatarMap} 
                                                     onEdit={handleEdit} 
+                                                    onDelete={(id) => setDeleteId(id)}
                                                     onStatusChange={handleStatusChange} 
                                                     onPriorityChange={handlePriorityChange} 
                                                 />
@@ -258,16 +259,6 @@ export const TasksPage: React.FC = () => {
                                     userAvatarMap={userAvatarMap} 
                                     onEdit={handleEdit} 
                                     onStatusChange={handleStatusChange} 
-                                />
-                            </div>
-                        )}
-                        
-                        {viewMode === 'calendar' && (
-                            <div className="p-4 lg:p-8 h-[700px] lg:h-[800px] animate-premium">
-                                <TasksCalendar 
-                                    tasks={filteredTasks} 
-                                    onEdit={handleEdit} 
-                                    onCreateAt={handleCreateAt} 
                                 />
                             </div>
                         )}
@@ -319,3 +310,4 @@ export const TasksPage: React.FC = () => {
     </div>
   );
 };
+    

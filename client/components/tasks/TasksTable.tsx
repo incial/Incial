@@ -24,14 +24,14 @@ const Avatar = ({ name, url }: { name: string | null | undefined; url?: string }
                 src={url} 
                 alt={safeName} 
                 title={safeName}
-                className="h-6 w-6 rounded-lg object-cover border border-white shadow-sm ring-1 ring-gray-100" 
+                className="h-6 w-6 rounded-lg object-cover border border-white shadow-sm ring-1 ring-gray-100 flex-shrink-0" 
             />
         );
     }
 
     const bg = safeName === 'Unassigned' ? 'bg-gray-100 text-gray-400' : 'bg-brand-50 text-brand-700';
     return (
-        <div className={`h-6 w-6 rounded-lg flex items-center justify-center text-[10px] font-bold ${bg} border border-white shadow-sm ring-1 ring-gray-100`} title={safeName}>
+        <div className={`h-6 w-6 rounded-lg flex items-center justify-center text-[10px] font-bold ${bg} border border-white shadow-sm ring-1 ring-gray-100 flex-shrink-0`} title={safeName}>
             {initials}
         </div>
     );
@@ -52,13 +52,13 @@ const StatusDropdown = ({ task, onStatusChange }: { task: Task; onStatusChange: 
     }, []);
 
     return (
-        <div className="relative inline-block" ref={ref}>
+        <div className="relative inline-block w-full" ref={ref}>
             <button 
                 onClick={() => setIsOpen(!isOpen)}
-                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-bold border shadow-sm transition-all hover:opacity-90 hover:shadow-md active:scale-95 ${getTaskStatusStyles(task.status)}`}
+                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-bold border shadow-sm transition-all hover:opacity-90 hover:shadow-md active:scale-95 w-full justify-between whitespace-nowrap ${getTaskStatusStyles(task.status)}`}
             >
-                {task.status}
-                <ChevronDown className={`h-3 w-3 opacity-50 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+                <span className="truncate">{task.status}</span>
+                <ChevronDown className={`h-3 w-3 opacity-50 transition-transform duration-200 flex-shrink-0 ${isOpen ? 'rotate-180' : ''}`} />
             </button>
             
             {isOpen && (
@@ -72,16 +72,16 @@ const StatusDropdown = ({ task, onStatusChange }: { task: Task; onStatusChange: 
                                     task.status === opt ? 'bg-brand-50 text-brand-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                                 }`}
                             >
-                                <div className="flex items-center gap-2">
-                                    <span className={`w-1.5 h-1.5 rounded-full ${
+                                <div className="flex items-center gap-2 truncate">
+                                    <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${
                                         opt === 'Completed' ? 'bg-green-500' : 
                                         opt === 'Posted' ? 'bg-sky-500' :
                                         opt === 'In Review' ? 'bg-purple-500' :
                                         opt === 'In Progress' ? 'bg-blue-500' : 'bg-gray-400'
                                     }`} />
-                                    {opt}
+                                    <span className="truncate">{opt}</span>
                                 </div>
-                                {task.status === opt && <Check className="h-3 w-3 text-brand-600 ml-auto" />}
+                                {task.status === opt && <Check className="h-3 w-3 text-brand-600 ml-auto flex-shrink-0" />}
                             </button>
                         ))}
                     </div>
@@ -106,13 +106,13 @@ const PriorityDropdown = ({ task, onPriorityChange }: { task: Task; onPriorityCh
     }, []);
 
     return (
-        <div className="relative inline-block" ref={ref}>
+        <div className="relative inline-block w-full" ref={ref}>
             <button 
                 onClick={() => setIsOpen(!isOpen)}
-                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-bold border shadow-sm transition-all hover:opacity-90 hover:shadow-md active:scale-95 uppercase tracking-wide ${getTaskPriorityStyles(task.priority)}`}
+                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-bold border shadow-sm transition-all hover:opacity-90 hover:shadow-md active:scale-95 uppercase tracking-wide w-full justify-between ${getTaskPriorityStyles(task.priority)}`}
             >
-                {task.priority}
-                <ChevronDown className={`h-3 w-3 opacity-50 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+                <span className="truncate">{task.priority}</span>
+                <ChevronDown className={`h-3 w-3 opacity-50 transition-transform duration-200 flex-shrink-0 ${isOpen ? 'rotate-180' : ''}`} />
             </button>
             
             {isOpen && (
@@ -127,7 +127,7 @@ const PriorityDropdown = ({ task, onPriorityChange }: { task: Task; onPriorityCh
                                 }`}
                             >
                                 {opt}
-                                {task.priority === opt && <Check className="h-3 w-3 text-brand-600 ml-auto" />}
+                                {task.priority === opt && <Check className="h-3 w-3 text-brand-600 ml-auto flex-shrink-0" />}
                             </button>
                         ))}
                     </div>
@@ -140,20 +140,19 @@ const PriorityDropdown = ({ task, onPriorityChange }: { task: Task; onPriorityCh
 
 export const TasksTable: React.FC<TasksTableProps> = ({ data, companyMap, userAvatarMap, onEdit, onDelete, onStatusChange, onPriorityChange }) => {
   return (
-    <div className="overflow-x-auto bg-white min-h-[400px] pb-32">
-        <table className="w-full text-left border-collapse whitespace-nowrap">
+    <div className="w-full min-h-[400px] pb-32">
+        <table className="w-full text-left border-separate border-spacing-y-3 table-fixed">
             <thead>
-                <tr className="bg-white border-b border-gray-100">
-                    <th className="px-6 py-5 text-[10px] font-bold text-gray-400 uppercase tracking-widest w-1/4">Task Name</th>
-                    <th className="px-6 py-5 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Client</th>
-                    <th className="px-6 py-5 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Status</th>
-                    <th className="px-6 py-5 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Assignee</th>
-                    <th className="px-6 py-5 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Due Date</th>
-                    <th className="px-6 py-5 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Priority</th>
-                    <th className="px-6 py-5 text-[10px] font-bold text-gray-400 uppercase tracking-widest text-right">Actions</th>
+                <tr className="text-gray-400">
+                    <th className="px-6 py-3 text-[10px] font-bold uppercase tracking-widest w-[30%]">Task Name</th>
+                    <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-widest w-[16%]">Client</th>
+                    <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-widest w-[16%]">Status</th>
+                    <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-widest w-[14%]">Assignee</th>
+                    <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-widest w-[12%]">Due Date</th>
+                    <th className="px-6 py-3 text-[10px] font-bold uppercase tracking-widest w-[12%] text-right">Priority</th>
                 </tr>
             </thead>
-            <tbody className="divide-y divide-gray-50">
+            <tbody>
                 {data.map(task => {
                     const clientName = (task.companyId && companyMap) ? companyMap[task.companyId] : null;
                     const isCompleted = (task.status === 'Completed' || task.status === 'Done');
@@ -163,26 +162,26 @@ export const TasksTable: React.FC<TasksTableProps> = ({ data, companyMap, userAv
                     return (
                     <tr 
                         key={task.id} 
-                        className={`group hover:bg-slate-50/50 transition-colors duration-200 ${shouldAnimate ? 'animate-task-complete' : ''}`}
+                        className={`group transition-all duration-200 ${shouldAnimate ? 'animate-task-complete' : ''}`}
                     >
                         {/* Name */}
-                        <td className="px-6 py-4">
-                            <div className="flex flex-col">
-                                <button onClick={() => onEdit(task)} className="text-sm font-bold text-gray-900 hover:text-brand-600 transition-colors text-left truncate max-w-xs block leading-snug">
+                        <td className="px-6 py-5 align-top bg-white first:rounded-l-[1.5rem] border-y border-l border-gray-100 shadow-sm group-hover:shadow-md transition-all">
+                            <div className="flex flex-col pr-4">
+                                <button onClick={() => onEdit(task)} className="text-sm font-bold text-gray-900 hover:text-brand-600 transition-colors text-left truncate block leading-snug w-full">
                                     {task.title}
                                 </button>
                                 {task.description && (
-                                    <p className="text-[10px] text-gray-400 truncate max-w-xs mt-0.5 font-medium">{task.description}</p>
+                                    <p className="text-[10px] text-gray-400 truncate mt-0.5 font-medium w-full">{task.description}</p>
                                 )}
                             </div>
                         </td>
 
                         {/* Client */}
-                        <td className="px-6 py-4">
+                        <td className="px-4 py-5 align-middle bg-white border-y border-gray-100 shadow-sm group-hover:shadow-md transition-all">
                             {clientName ? (
-                                <div className="flex items-center gap-2 text-xs font-semibold text-gray-700 bg-gray-50 px-2.5 py-1.5 rounded-lg border border-gray-100 w-fit">
-                                    <Building className="h-3 w-3 text-gray-400" />
-                                    <span className="truncate max-w-[120px]">{clientName}</span>
+                                <div className="flex items-center gap-2 text-xs font-semibold text-gray-700 bg-gray-50 px-2.5 py-1.5 rounded-lg border border-gray-100 w-full max-w-[140px]">
+                                    <Building className="h-3 w-3 text-gray-400 flex-shrink-0" />
+                                    <span className="truncate">{clientName}</span>
                                 </div>
                             ) : (
                                 <span className="text-[10px] text-gray-400 font-bold bg-gray-50 px-2 py-1 rounded border border-gray-100">INTERNAL</span>
@@ -190,47 +189,37 @@ export const TasksTable: React.FC<TasksTableProps> = ({ data, companyMap, userAv
                         </td>
 
                         {/* Status (Custom Dropdown) */}
-                        <td className="px-6 py-4">
+                        <td className="px-4 py-5 align-middle bg-white border-y border-gray-100 shadow-sm group-hover:shadow-md transition-all">
                             <StatusDropdown task={task} onStatusChange={onStatusChange} />
                         </td>
 
                         {/* Assignee */}
-                        <td className="px-6 py-4">
-                             <div className="flex items-center gap-2">
+                        <td className="px-4 py-5 align-middle bg-white border-y border-gray-100 shadow-sm group-hover:shadow-md transition-all">
+                             <div className="flex items-center gap-2 overflow-hidden">
                                 <Avatar name={task.assignedTo} url={userAvatarUrl} />
-                                <span className="text-xs font-semibold text-gray-600">{task.assignedTo || 'Unassigned'}</span>
+                                <span className="text-xs font-semibold text-gray-600 truncate">{task.assignedTo || 'Unassigned'}</span>
                              </div>
                         </td>
 
                         {/* Due Date */}
-                        <td className="px-6 py-4">
+                        <td className="px-4 py-5 align-middle bg-white border-y border-gray-100 shadow-sm group-hover:shadow-md transition-all">
                             <div className="flex items-center gap-2 text-gray-500">
-                                <Calendar className="h-3.5 w-3.5 text-gray-400" />
-                                <span className="text-xs font-bold font-mono">{formatDate(task.dueDate)}</span>
+                                <Calendar className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />
+                                <span className="text-xs font-bold font-mono truncate">{formatDate(task.dueDate)}</span>
                             </div>
                         </td>
 
                         {/* Priority (Custom Dropdown) */}
-                        <td className="px-6 py-4">
-                             <PriorityDropdown task={task} onPriorityChange={onPriorityChange} />
-                        </td>
-
-                        {/* Actions */}
-                        <td className="px-6 py-4 text-right">
-                             <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-all duration-200 translate-x-2 group-hover:translate-x-0">
-                                <button onClick={() => onEdit(task)} className="p-2 text-gray-400 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition-colors">
-                                    <Edit2 className="h-4 w-4" />
-                                </button>
-                                <button onClick={() => onDelete(task.id)} className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
-                                    <Trash2 className="h-4 w-4" />
-                                </button>
+                        <td className="px-6 py-5 align-middle bg-white last:rounded-r-[1.5rem] border-y border-r border-gray-100 shadow-sm group-hover:shadow-md transition-all text-right">
+                             <div className="flex justify-end">
+                                <PriorityDropdown task={task} onPriorityChange={onPriorityChange} />
                              </div>
                         </td>
                     </tr>
                 )})}
                 {data.length === 0 && (
                      <tr>
-                        <td colSpan={7} className="px-6 py-20 text-center text-gray-400 text-sm">
+                        <td colSpan={6} className="px-4 py-20 text-center text-gray-400 text-sm">
                             <div className="flex flex-col items-center justify-center gap-3">
                                 <div className="h-12 w-12 bg-gray-50 rounded-2xl border border-gray-100 flex items-center justify-center">
                                     <Check className="h-6 w-6 text-gray-300" />
